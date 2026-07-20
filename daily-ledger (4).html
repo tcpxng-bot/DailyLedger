@@ -1,0 +1,2436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Daily Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Trirong:wght@300;400;500;600;700&family=Athiti:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FAF8F5;
+    --card:#FFFFFF;
+    --primary:#A8C8B8;
+    --primary-ink:#4F6E5F;
+    --secondary:#C7DDE8;
+    --secondary-ink:#3F6478;
+    --accent:#E8CFCB;
+    --accent-ink:#8A544C;
+    --text:#3A3A3A;
+    --text-soft:#8B8782;
+    --border:#ECECEC;
+    --shadow: 0 10px 30px -12px rgba(58,58,58,0.10);
+    --shadow-lift: 0 18px 40px -16px rgba(58,58,58,0.18);
+    --radius:24px;
+    --accent-color: var(--primary);
+    --accent-color-ink: var(--primary-ink);
+    --neg:#C98B84;
+    --pos:#7FA88F;
+  }
+  html.dark{
+    --bg:#181715;
+    --card:#221F1C;
+    --primary:#7FA08F;
+    --primary-ink:#B9D6C7;
+    --secondary:#6C93A6;
+    --secondary-ink:#C7DDE8;
+    --accent:#C99089;
+    --accent-ink:#EFD3CE;
+    --text:#F1EEE9;
+    --text-soft:#9A958E;
+    --border:#312D28;
+    --shadow: 0 10px 30px -12px rgba(0,0,0,0.45);
+    --shadow-lift: 0 18px 44px -16px rgba(0,0,0,0.55);
+    --neg:#D69890;
+    --pos:#8FBBA1;
+  }
+  html.theme-playful{
+    --bg:#FFF6E9;
+    --card:#FFFFFF;
+    --primary:#33C481;
+    --primary-ink:#0E7A4B;
+    --secondary:#4FA8FF;
+    --secondary-ink:#0A5FB8;
+    --accent:#FF6F91;
+    --accent-ink:#C22459;
+    --text:#3A3A3A;
+    --text-soft:#8B8782;
+    --border:#F3E4C8;
+    --shadow: 0 10px 30px -12px rgba(58,58,58,0.12);
+    --shadow-lift: 0 18px 40px -16px rgba(58,58,58,0.20);
+    --neg:#FF5C6C;
+    --pos:#22C57E;
+  }
+  html.theme-playful.dark{
+    --bg:#201A2E;
+    --card:#2C2340;
+    --primary:#4ADE80;
+    --primary-ink:#BEF7D3;
+    --secondary:#60A5FA;
+    --secondary-ink:#D6E9FF;
+    --accent:#FB7185;
+    --accent-ink:#FFD6DC;
+    --text:#F5F0FF;
+    --text-soft:#B3A8D9;
+    --border:#3D3355;
+    --shadow: 0 10px 30px -12px rgba(0,0,0,0.5);
+    --shadow-lift: 0 18px 44px -16px rgba(0,0,0,0.6);
+    --neg:#FB7185;
+    --pos:#4ADE80;
+  }
+  html.theme-cute{
+    --bg:#FFF0F5;
+    --card:#FFFFFF;
+    --primary:#FF9EC4;
+    --primary-ink:#C2447D;
+    --secondary:#A9E4F7;
+    --secondary-ink:#2F8CAE;
+    --accent:#FFE29A;
+    --accent-ink:#B9821B;
+    --text:#4A3B4D;
+    --text-soft:#B48EA8;
+    --border:#FFE0EC;
+    --shadow: 0 10px 30px -12px rgba(194,68,125,0.14);
+    --shadow-lift: 0 18px 40px -16px rgba(194,68,125,0.22);
+    --neg:#FF8FA3;
+    --pos:#7ED6A5;
+  }
+  html.theme-cute.dark{
+    --bg:#2B1F2B;
+    --card:#3A2A3A;
+    --primary:#FF9EC4;
+    --primary-ink:#FFD6E8;
+    --secondary:#7FD4EC;
+    --secondary-ink:#D9F4FF;
+    --accent:#FFD97A;
+    --accent-ink:#FFF0C7;
+    --text:#FBEFFA;
+    --text-soft:#C9A8C4;
+    --border:#4A3849;
+    --shadow: 0 10px 30px -12px rgba(0,0,0,0.5);
+    --shadow-lift: 0 18px 44px -16px rgba(0,0,0,0.6);
+    --neg:#FF8FA3;
+    --pos:#7ED6A5;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Athiti', sans-serif;
+    -webkit-font-smoothing:antialiased;
+    transition:background .35s ease, color .35s ease;
+    overscroll-behavior-y:none;
+  }
+  .serif{ font-family:'Trirong', serif; }
+  html.lang-th .serif{ font-family:'Athiti', sans-serif; }
+  html.lang-th .amount-input{ font-family:'Athiti', sans-serif; }
+  #shell{
+    max-width:480px;
+    margin:0 auto;
+    min-height:100vh;
+    position:relative;
+    padding-bottom:110px;
+    background:var(--bg);
+  }
+  @media (min-width:520px){
+    #shell{ box-shadow: var(--shadow-lift); min-height:100vh; }
+    body{ background: linear-gradient(180deg,var(--bg),var(--bg)); }
+  }
+  ::-webkit-scrollbar{ display:none; }
+  * { scrollbar-width:none; }
+
+  .eyebrow{
+    font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--text-soft); font-weight:700;
+  }
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+  }
+  .icon-chip{
+    width:44px; height:44px; border-radius:16px;
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+  .icon-chip svg{ width:20px; height:20px; }
+
+  /* header */
+  .topbar{
+    position:sticky; top:0; z-index:20;
+    background:linear-gradient(var(--bg) 70%, transparent);
+    padding:22px 20px 6px;
+  }
+
+  /* wallet cards */
+  .wallet-scroll{
+    display:flex; gap:14px; overflow-x:auto; padding:4px 20px 10px;
+    scroll-snap-type:x mandatory;
+  }
+  .wallet-card{
+    scroll-snap-align:start;
+    min-width:210px; height:132px;
+    border-radius:22px; padding:18px;
+    position:relative; overflow:hidden;
+    color:#3A3A3A;
+    display:flex; flex-direction:column; justify-content:space-between;
+    box-shadow: var(--shadow);
+    transition:transform .25s ease;
+  }
+  .wallet-card:active{ transform:scale(.97); }
+  .wallet-card::after{
+    content:''; position:absolute; right:-30px; top:-30px;
+    width:120px; height:120px; border-radius:50%;
+    background:rgba(255,255,255,.25);
+  }
+  .wallet-card .wtop{ display:flex; justify-content:space-between; align-items:flex-start; z-index:1;}
+  .wallet-card .wicon{
+    width:34px; height:34px; border-radius:11px; background:rgba(255,255,255,.55);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .wallet-card .wicon svg{ width:17px; height:17px; }
+  .wallet-add{
+    min-width:120px; height:132px; border-radius:22px;
+    border:1.5px dashed var(--border);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:6px; color:var(--text-soft); font-size:12px; font-weight:600;
+    flex-shrink:0;
+  }
+  .quick-pill{
+    flex-shrink:0; display:flex; align-items:center; gap:10px;
+    background:var(--card); border:1px solid var(--border); border-radius:18px;
+    padding:10px 16px 10px 10px; cursor:pointer; transition:transform .15s ease;
+  }
+  .quick-pill:active{ transform:scale(.95); }
+
+  /* nav */
+  .navbar{
+    position:fixed; left:50%; transform:translateX(-50%);
+    bottom:16px; width:calc(100% - 32px); max-width:448px;
+    background:var(--card); border:1px solid var(--border);
+    border-radius:28px; box-shadow:var(--shadow-lift);
+    display:flex; align-items:center; justify-content:space-around;
+    padding:10px 6px; z-index:40;
+  }
+  .navbtn{
+    display:flex; flex-direction:column; align-items:center; gap:3px;
+    color:var(--text-soft); background:none; border:none; padding:6px 10px;
+    font-size:10px; font-weight:700; letter-spacing:.02em; cursor:pointer;
+    transition:color .2s ease;
+  }
+  .navbtn svg{ width:21px; height:21px; transition:transform .2s ease; }
+  .navbtn.active{ color:var(--accent-color-ink); }
+  .navbtn.active svg{ transform:translateY(-1px) scale(1.05); }
+  .fab{
+    width:56px; height:56px; border-radius:50%;
+    background:var(--text); color:var(--bg);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 12px 24px -8px rgba(0,0,0,.35);
+    margin-top:-34px; border:5px solid var(--bg);
+    transition:transform .18s ease;
+  }
+  html.dark .fab{ background:var(--card); color:var(--text); }
+  .fab:active{ transform:scale(.9) rotate(90deg); }
+  .fab svg{ width:24px; height:24px; }
+
+  /* sheet */
+  .sheet-overlay{
+    position:fixed; inset:0; background:rgba(30,28,25,.42);
+    z-index:60; opacity:0; pointer-events:none; transition:opacity .3s ease;
+  }
+  .sheet-overlay.open{ opacity:1; pointer-events:auto; }
+  .sheet{
+    position:fixed; left:50%; bottom:0; transform:translate(-50%,100%);
+    width:100%; max-width:480px; background:var(--card);
+    border-radius:28px 28px 0 0; z-index:61; padding:10px 20px 26px;
+    transition:transform .38s cubic-bezier(.22,1,.36,1);
+    max-height:88vh; overflow-y:auto;
+  }
+  .sheet.open{ transform:translate(-50%,0); }
+  .sheet-handle{ width:38px; height:5px; border-radius:3px; background:var(--border); margin:6px auto 14px; }
+
+  .segmented{
+    display:flex; background:var(--bg); border:1px solid var(--border);
+    border-radius:16px; padding:4px; gap:4px;
+  }
+  .segmented button{
+    flex:1; padding:9px 0; border:none; background:transparent; border-radius:12px;
+    font-family:inherit; font-weight:700; font-size:13px; color:var(--text-soft);
+    cursor:pointer; transition:all .2s ease;
+  }
+  .segmented button.active{ background:var(--card); color:var(--accent-color-ink); box-shadow:var(--shadow); }
+
+  .amount-input{
+    font-family:'Trirong', serif; font-size:52px; font-weight:600;
+    text-align:center; width:100%; border:none; background:transparent;
+    color:var(--text); outline:none;
+  }
+  .amount-input::placeholder{ color:var(--border); }
+
+  .field-row{
+    display:flex; align-items:center; gap:12px; padding:14px 4px;
+    border-bottom:1px solid var(--border);
+  }
+  .field-row:last-child{ border-bottom:none; }
+  .field-row input, .field-row textarea, .field-row select{
+    border:none; background:transparent; outline:none; font-family:inherit;
+    font-size:15px; color:var(--text); width:100%; font-weight:600;
+  }
+  .field-row textarea{ resize:none; font-weight:500; }
+
+  .pill-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+  .pill{
+    display:flex; flex-direction:column; align-items:center; gap:6px;
+    padding:10px 4px; border-radius:16px; border:1.5px solid transparent;
+    cursor:pointer; transition:all .18s ease;
+  }
+  .pill.selected{ border-color:var(--text); }
+  .pill span{ font-size:10.5px; font-weight:700; color:var(--text-soft); text-align:center; }
+  .pill.selected span{ color:var(--text); }
+
+  .save-btn{
+    width:100%; padding:16px; border:none; border-radius:18px;
+    background:var(--accent-color); color:var(--accent-color-ink); font-family:inherit;
+    font-weight:800; font-size:15px; letter-spacing:.01em; cursor:pointer;
+    margin-top:16px; transition:transform .15s ease, background .25s ease, color .25s ease;
+  }
+  .save-btn:active{ transform:scale(.97); }
+
+  /* timeline */
+  .day-group{ padding:0 20px; margin-bottom:22px; }
+  .day-head{ display:flex; align-items:baseline; justify-content:space-between; margin-bottom:10px; padding-left:2px;}
+  .day-title{ font-size:13px; font-weight:800; }
+  .day-sub{ font-size:11px; color:var(--text-soft); font-weight:600; }
+  .tl-row{
+    display:flex; align-items:center; gap:12px; padding:11px 4px 11px 14px;
+    border-left:2px solid var(--border); position:relative;
+  }
+  .tl-row::before{
+    content:''; position:absolute; left:-5px; top:50%; transform:translateY(-50%);
+    width:8px; height:8px; border-radius:50%; background:var(--border);
+  }
+  .tl-time{ font-size:10.5px; color:var(--text-soft); font-weight:700; width:36px; flex-shrink:0; }
+
+  .progress-track{ height:8px; border-radius:6px; background:var(--bg); border:1px solid var(--border); overflow:hidden; }
+  .progress-fill{ height:100%; border-radius:6px; transition:width .5s ease; }
+
+  .chip{
+    padding:7px 13px; border-radius:14px; border:1px solid var(--border);
+    font-size:12px; font-weight:700; color:var(--text-soft); background:var(--card);
+    white-space:nowrap; cursor:pointer; transition:all .18s ease;
+  }
+  .chip.active{ background:var(--accent-color); color:var(--accent-color-ink); border-color:var(--accent-color); }
+
+  .toast{
+    position:fixed; left:50%; bottom:110px; transform:translate(-50%,20px);
+    background:var(--text); color:var(--bg); padding:12px 20px; border-radius:16px;
+    font-size:13px; font-weight:700; z-index:80; opacity:0; pointer-events:none;
+    transition:all .3s cubic-bezier(.22,1,.36,1); box-shadow:var(--shadow-lift);
+    display:flex; align-items:center; gap:8px;
+  }
+  .toast.show{ opacity:1; transform:translate(-50%,0); }
+
+  .fade-in{ animation:fadeIn .4s ease both; }
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+
+  .tab-panel{ display:none; }
+  .tab-panel.active{ display:block; }
+
+  input[type=range]{ -webkit-appearance:none; height:6px; border-radius:4px; background:var(--border); }
+  input[type=range]::-webkit-slider-thumb{ -webkit-appearance:none; width:18px; height:18px; border-radius:50%; background:var(--text); cursor:pointer; }
+
+  .swatch{ width:30px; height:30px; border-radius:50%; border:2px solid transparent; cursor:pointer; }
+  .swatch.selected{ border-color:var(--text); }
+
+  .icon-svg{
+    width:20px; height:20px; flex-shrink:0;
+    fill:none; stroke:currentColor; stroke-width:2;
+    stroke-linecap:round; stroke-linejoin:round;
+  }
+
+  .app-hidden{ display:none !important; }
+  .auth-screen{
+    position:fixed; inset:0; max-width:480px; margin:0 auto;
+    background:var(--bg); z-index:100;
+    display:flex; flex-direction:column; justify-content:center;
+    padding:32px 28px; overflow-y:auto;
+  }
+  .auth-screen.hidden{ display:none; }
+  .auth-field{
+    display:flex; align-items:center; gap:12px; padding:14px 16px;
+    background:var(--card); border:1px solid var(--border); border-radius:16px; margin-bottom:12px;
+  }
+  .auth-field input{
+    border:none; background:transparent; outline:none; font-family:inherit;
+    font-size:14.5px; color:var(--text); width:100%; font-weight:600;
+  }
+  .auth-error{
+    background:var(--accent)33; color:var(--neg); font-size:12.5px; font-weight:700;
+    padding:10px 14px; border-radius:12px; margin-bottom:12px; display:none;
+  }
+  .auth-error.show{ display:block; }
+
+  /* full-screen page overlay (wallet detail) */
+  .page-overlay{
+    position:fixed; inset:0; max-width:480px; margin:0 auto;
+    background:var(--bg); z-index:70;
+    transform:translateX(100vw); transition:transform .38s cubic-bezier(.22,1,.36,1);
+    overflow-y:auto; padding-bottom:40px;
+  }
+  .page-overlay.open{ transform:translateX(0); }
+  .page-head{
+    display:flex; align-items:center; gap:14px; padding:20px; position:sticky; top:0;
+    background:var(--bg); z-index:2;
+  }
+  .back-btn{
+    width:38px; height:38px; border-radius:50%; border:1px solid var(--border);
+    background:var(--card); display:flex; align-items:center; justify-content:center; flex-shrink:0;
+    cursor:pointer;
+  }
+
+  /* calendar */
+  .cal-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:4px; padding:0 4px; }
+  .cal-dow{ text-align:center; font-size:10.5px; font-weight:800; color:var(--text-soft); padding-bottom:6px; }
+  .cal-cell{
+    aspect-ratio:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    border-radius:14px; cursor:pointer; position:relative; gap:2px;
+  }
+  .cal-cell .num{ font-size:12.5px; font-weight:700; }
+  .cal-cell.faded{ opacity:.28; }
+  .cal-cell.selected{ background:var(--text); color:var(--bg); }
+  .cal-cell.today:not(.selected){ border:1.5px solid var(--text); }
+  .cal-dots{ display:flex; gap:2px; height:5px; }
+  .cal-dot{ width:4px; height:4px; border-radius:50%; }
+
+  /* photo attachment */
+  .photo-thumb{ width:44px; height:44px; border-radius:14px; object-fit:cover; flex-shrink:0; }
+  .photo-preview-wrap{ position:relative; display:inline-block; }
+  .photo-remove{
+    position:absolute; top:-6px; right:-6px; width:22px; height:22px; border-radius:50%;
+    background:var(--text); color:var(--bg); border:2px solid var(--card); display:flex; align-items:center; justify-content:center; cursor:pointer;
+  }
+  .photo-remove svg{ width:12px; height:12px; }
+  .attach-btn{
+    display:flex; align-items:center; gap:8px; padding:10px 14px; border-radius:14px;
+    border:1.5px dashed var(--border); color:var(--text-soft); font-size:12.5px; font-weight:700;
+    cursor:pointer; background:none; font-family:inherit;
+  }
+</style>
+</head>
+<body>
+<svg style="display:none"><symbol id="icon-arrow-down-left" viewBox="0 0 24 24"><path d="M17 7 7 17" />
+  <path d="M17 17H7V7" /></symbol><symbol id="icon-arrow-down-right" viewBox="0 0 24 24"><path d="m7 7 10 10" />
+  <path d="M17 7v10H7" /></symbol><symbol id="icon-arrow-left" viewBox="0 0 24 24"><path d="m12 19-7-7 7-7" />
+  <path d="M19 12H5" /></symbol><symbol id="icon-arrow-up-right" viewBox="0 0 24 24"><path d="M7 7h10v10" />
+  <path d="M7 17 17 7" /></symbol><symbol id="icon-banknote" viewBox="0 0 24 24"><rect width="20" height="12" x="2" y="6" rx="2" />
+  <circle cx="12" cy="12" r="2" />
+  <path d="M6 12h.01M18 12h.01" /></symbol><symbol id="icon-book-open" viewBox="0 0 24 24"><path d="M12 7v14" />
+  <path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z" /></symbol><symbol id="icon-calendar-days" viewBox="0 0 24 24"><path d="M8 2v4" />
+  <path d="M16 2v4" />
+  <rect width="18" height="18" x="3" y="4" rx="2" />
+  <path d="M3 10h18" />
+  <path d="M8 14h.01" />
+  <path d="M12 14h.01" />
+  <path d="M16 14h.01" />
+  <path d="M8 18h.01" />
+  <path d="M12 18h.01" />
+  <path d="M16 18h.01" /></symbol><symbol id="icon-calendar" viewBox="0 0 24 24"><path d="M8 2v4" />
+  <path d="M16 2v4" />
+  <rect width="18" height="18" x="3" y="4" rx="2" />
+  <path d="M3 10h18" /></symbol><symbol id="icon-camera" viewBox="0 0 24 24"><path d="M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z" />
+  <circle cx="12" cy="13" r="3" /></symbol><symbol id="icon-car" viewBox="0 0 24 24"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2" />
+  <circle cx="7" cy="17" r="2" />
+  <path d="M9 17h6" />
+  <circle cx="17" cy="17" r="2" /></symbol><symbol id="icon-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5" /></symbol><symbol id="icon-chevron-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" /></symbol><symbol id="icon-chevron-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6" /></symbol><symbol id="icon-chevron-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" /></symbol><symbol id="icon-chevron-up" viewBox="0 0 24 24"><path d="m18 15-6-6-6 6" /></symbol><symbol id="icon-circle-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" />
+  <line x1="12" x2="12" y1="8" y2="12" />
+  <line x1="12" x2="12.01" y1="16" y2="16" /></symbol><symbol id="icon-circle-user-round" viewBox="0 0 24 24"><path d="M17.925 20.056a6 6 0 0 0-11.851.001" />
+  <circle cx="12" cy="11" r="4" />
+  <circle cx="12" cy="12" r="10" /></symbol><symbol id="icon-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /></symbol><symbol id="icon-coffee" viewBox="0 0 24 24"><path d="M10 2v2" />
+  <path d="M14 2v2" />
+  <path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1" />
+  <path d="M6 2v2" /></symbol><symbol id="icon-credit-card" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="5" rx="2" />
+  <line x1="2" x2="22" y1="10" y2="10" /></symbol><symbol id="icon-database-backup" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3" />
+  <path d="M3 12a9 3 0 0 0 5 2.69" />
+  <path d="M21 9.3V5" />
+  <path d="M3 5v14a9 3 0 0 0 6.47 2.88" />
+  <path d="M12 12v4h4" />
+  <path d="M13 20a5 5 0 0 0 9-3 4.5 4.5 0 0 0-4.5-4.5c-1.33 0-2.54.54-3.41 1.41L12 16" /></symbol><symbol id="icon-dumbbell" viewBox="0 0 24 24"><path d="M17.596 12.768a2 2 0 1 0 2.829-2.829l-1.768-1.767a2 2 0 0 0 2.828-2.829l-2.828-2.828a2 2 0 0 0-2.829 2.828l-1.767-1.768a2 2 0 1 0-2.829 2.829z" />
+  <path d="m2.5 21.5 1.4-1.4" />
+  <path d="m20.1 3.9 1.4-1.4" />
+  <path d="M5.343 21.485a2 2 0 1 0 2.829-2.828l1.767 1.768a2 2 0 1 0 2.829-2.829l-6.364-6.364a2 2 0 1 0-2.829 2.829l1.768 1.767a2 2 0 0 0-2.828 2.829z" />
+  <path d="m9.6 14.4 4.8-4.8" /></symbol><symbol id="icon-file-spreadsheet" viewBox="0 0 24 24"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z" />
+  <path d="M14 2v5a1 1 0 0 0 1 1h5" />
+  <path d="M8 13h2" />
+  <path d="M14 13h2" />
+  <path d="M8 17h2" />
+  <path d="M14 17h2" /></symbol><symbol id="icon-film" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2" />
+  <path d="M7 3v18" />
+  <path d="M3 7.5h4" />
+  <path d="M3 12h18" />
+  <path d="M3 16.5h4" />
+  <path d="M17 3v18" />
+  <path d="M17 7.5h4" />
+  <path d="M17 16.5h4" /></symbol><symbol id="icon-flame" viewBox="0 0 24 24"><path d="M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4" /></symbol><symbol id="icon-gift" viewBox="0 0 24 24"><path d="M12 7v14" />
+  <path d="M20 11v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8" />
+  <path d="M7.5 7a1 1 0 0 1 0-5A4.8 8 0 0 1 12 7a4.8 8 0 0 1 4.5-5 1 1 0 0 1 0 5" />
+  <rect x="3" y="7" width="18" height="4" rx="1" /></symbol><symbol id="icon-graduation-cap" viewBox="0 0 24 24"><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z" />
+  <path d="M22 10v6" />
+  <path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5" /></symbol><symbol id="icon-heart-pulse" viewBox="0 0 24 24"><path d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5" />
+  <path d="M3.22 13H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27" /></symbol><symbol id="icon-home" viewBox="0 0 24 24"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
+  <path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /></symbol><symbol id="icon-house" viewBox="0 0 24 24"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
+  <path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /></symbol><symbol id="icon-landmark" viewBox="0 0 24 24"><path d="M10 18v-7" />
+  <path d="M11.119 2.205a2 2 0 0 1 1.762 0l7.84 3.846A.5.5 0 0 1 20.5 7h-17a.5.5 0 0 1-.22-.949z" />
+  <path d="M14 18v-7" />
+  <path d="M18 18v-7" />
+  <path d="M3 22h18" />
+  <path d="M6 18v-7" /></symbol><symbol id="icon-list" viewBox="0 0 24 24"><path d="M3 5h.01" />
+  <path d="M3 12h.01" />
+  <path d="M3 19h.01" />
+  <path d="M8 5h13" />
+  <path d="M8 12h13" />
+  <path d="M8 19h13" /></symbol><symbol id="icon-map-pin" viewBox="0 0 24 24"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0" />
+  <circle cx="12" cy="10" r="3" /></symbol><symbol id="icon-notebook-pen" viewBox="0 0 24 24"><path d="M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4" />
+  <path d="M2 6h4" />
+  <path d="M2 10h4" />
+  <path d="M2 14h4" />
+  <path d="M2 18h4" />
+  <path d="M21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z" /></symbol><symbol id="icon-paw-print" viewBox="0 0 24 24"><circle cx="11" cy="4" r="2" />
+  <circle cx="18" cy="8" r="2" />
+  <circle cx="20" cy="16" r="2" />
+  <path d="M9 10a5 5 0 0 1 5 5v3.5a3.5 3.5 0 0 1-6.84 1.045Q6.52 17.48 4.46 16.84A3.5 3.5 0 0 1 5.5 10Z" /></symbol><symbol id="icon-pen-line" viewBox="0 0 24 24"><path d="M13 21h8" />
+  <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" /></symbol><symbol id="icon-piggy-bank" viewBox="0 0 24 24"><path d="M11 17h3v2a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-3a3.16 3.16 0 0 0 2-2h1a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1h-1a5 5 0 0 0-2-4V3a4 4 0 0 0-3.2 1.6l-.3.4H11a6 6 0 0 0-6 6v1a5 5 0 0 0 2 4v3a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1z" />
+  <path d="M16 10h.01" />
+  <path d="M2 8v1a2 2 0 0 0 2 2h1" /></symbol><symbol id="icon-plane" viewBox="0 0 24 24"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z" /></symbol><symbol id="icon-plus" viewBox="0 0 24 24"><path d="M5 12h14" />
+  <path d="M12 5v14" /></symbol><symbol id="icon-receipt" viewBox="0 0 24 24"><path d="M12 17V7" />
+  <path d="M16 8h-6a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H8" />
+  <path d="M4 3a1 1 0 0 1 1-1 1.3 1.3 0 0 1 .7.2l.933.6a1.3 1.3 0 0 0 1.4 0l.934-.6a1.3 1.3 0 0 1 1.4 0l.933.6a1.3 1.3 0 0 0 1.4 0l.933-.6a1.3 1.3 0 0 1 1.4 0l.934.6a1.3 1.3 0 0 0 1.4 0l.933-.6A1.3 1.3 0 0 1 19 2a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1 1.3 1.3 0 0 1-.7-.2l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.934.6a1.3 1.3 0 0 1-1.4 0l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-1.4 0l-.934-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-.7.2 1 1 0 0 1-1-1z" /></symbol><symbol id="icon-search-x" viewBox="0 0 24 24"><path d="m13.5 8.5-5 5" />
+  <path d="m8.5 8.5 5 5" />
+  <circle cx="11" cy="11" r="8" />
+  <path d="m21 21-4.3-4.3" /></symbol><symbol id="icon-search" viewBox="0 0 24 24"><path d="m21 21-4.34-4.34" />
+  <circle cx="11" cy="11" r="8" /></symbol><symbol id="icon-send" viewBox="0 0 24 24"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z" />
+  <path d="m21.854 2.147-10.94 10.939" /></symbol><symbol id="icon-shirt" viewBox="0 0 24 24"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z" /></symbol><symbol id="icon-shopping-bag" viewBox="0 0 24 24"><path d="M16 10a4 4 0 0 1-8 0" />
+  <path d="M3.103 6.034h17.794" />
+  <path d="M3.4 5.467a2 2 0 0 0-.4 1.2V20a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6.667a2 2 0 0 0-.4-1.2l-2-2.667A2 2 0 0 0 17 2H7a2 2 0 0 0-1.6.8z" /></symbol><symbol id="icon-smartphone" viewBox="0 0 24 24"><rect width="14" height="20" x="5" y="2" rx="2" ry="2" />
+  <path d="M12 18h.01" /></symbol><symbol id="icon-sparkles" viewBox="0 0 24 24"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z" />
+  <path d="M20 2v4" />
+  <path d="M22 4h-4" />
+  <circle cx="4" cy="20" r="2" /></symbol><symbol id="icon-trash-2" viewBox="0 0 24 24"><path d="M10 11v6" />
+  <path d="M14 11v6" />
+  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+  <path d="M3 6h18" />
+  <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></symbol><symbol id="icon-trending-down" viewBox="0 0 24 24"><path d="M16 17h6v-6" />
+  <path d="m22 17-8.5-8.5-5 5L2 7" /></symbol><symbol id="icon-trending-up" viewBox="0 0 24 24"><path d="M16 7h6v6" />
+  <path d="m22 7-8.5 8.5-5-5L2 17" /></symbol><symbol id="icon-upload" viewBox="0 0 24 24"><path d="M12 3v12" />
+  <path d="m17 8-5-5-5 5" />
+  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /></symbol><symbol id="icon-utensils" viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" />
+  <path d="M7 2v20" />
+  <path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" /></symbol><symbol id="icon-wallet" viewBox="0 0 24 24"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1" />
+  <path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4" /></symbol><symbol id="icon-x" viewBox="0 0 24 24"><path d="M18 6 6 18" />
+  <path d="m6 6 12 12" /></symbol><symbol id="icon-zap" viewBox="0 0 24 24"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z" /></symbol><symbol id="icon-pie-chart" viewBox="0 0 24 24"><path d="M21 12c.552 0 1.005-.449.95-.998a10 10 0 0 0-8.953-8.951c-.55-.055-.998.398-.998.95v8a1 1 0 0 0 1 1z" />
+  <path d="M21.21 15.89A10 10 0 1 1 8 2.83" /></symbol><symbol id="icon-file-check-2" viewBox="0 0 24 24"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z" />
+  <path d="M14 2v5a1 1 0 0 0 1 1h5" />
+  <path d="m9 15 2 2 4-4" /></symbol></svg>
+
+<div id="authScreen" class="auth-screen"></div>
+
+<div id="shell" class="app-hidden">
+  <div id="content"></div>
+  <nav class="navbar">
+    <button class="navbtn" data-tab="home"><svg class="icon-svg"><use href="#icon-house"></use></svg><span id="navlbl-home">Home</span></button>
+    <button class="navbtn" data-tab="timeline"><svg class="icon-svg"><use href="#icon-notebook-pen"></use></svg><span id="navlbl-timeline">Timeline</span></button>
+    <button class="fab" id="fabBtn"><svg class="icon-svg" style="width:24px;height:24px;"><use href="#icon-plus"></use></svg></button>
+    <button class="navbtn" data-tab="budget"><svg class="icon-svg"><use href="#icon-pie-chart"></use></svg><span id="navlbl-budget">Budget</span></button>
+    <button class="navbtn" data-tab="profile"><svg class="icon-svg"><use href="#icon-circle-user-round"></use></svg><span id="navlbl-profile">Profile</span></button>
+  </nav>
+</div>
+
+<div class="sheet-overlay" id="overlay"></div>
+<div class="sheet" id="addSheet"></div>
+<div class="page-overlay" id="walletPage"></div>
+<div class="sheet-overlay" id="qiOverlay"></div>
+<div class="sheet" id="qiSheet"></div>
+<div class="sheet-overlay" id="instOverlay"></div>
+<div class="sheet" id="instSheet"></div>
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/12.15.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.15.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyB3H1la2-CHEYFwJ2aiQ4M0WOe52C6Xy-U",
+    authDomain: "daily-ledger-52cd1.firebaseapp.com",
+    projectId: "daily-ledger-52cd1",
+    storageBucket: "daily-ledger-52cd1.firebasestorage.app",
+    messagingSenderId: "390621456324",
+    appId: "1:390621456324:web:f2edb23e607deeca4d2691"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const fbAuth = firebase.auth();
+  const fbDb = firebase.firestore();
+</script>
+<script>
+/* ---------------- DATA MODEL ---------------- */
+/* ---------------- i18n ---------------- */
+const TR = {
+  nav_home:['Home','หน้าแรก'], nav_timeline:['Timeline','ไทม์ไลน์'], nav_budget:['Budget','งบประมาณ'], nav_profile:['Profile','โปรไฟล์'],
+  greeting_late:['Still up?','ยังไม่นอนเหรอ'], greeting_morning:['Good morning','สวัสดีตอนเช้า'], greeting_afternoon:['Good afternoon','สวัสดีตอนบ่าย'], greeting_evening:['Good evening','สวัสดีตอนเย็น'], greeting_night:['Winding down?','พักผ่อนแล้วนะ'],
+  home_sub:["Here's your ledger today.",'นี่คือสมุดบันทึกวันนี้ของคุณ'],
+  total_balance:['Total Balance','ยอดคงเหลือทั้งหมด'], this_month_in:['This month in','รับเดือนนี้'], this_month_out:['This month out','จ่ายเดือนนี้'],
+  wallets:['Wallets','กระเป๋าเงิน'], manage:['Manage','จัดการ'], add_wallet:['Add wallet','เพิ่มกระเป๋าเงิน'],
+  quick_log:['Quick log','บันทึกด่วน'], tap_to_log:['tap to log instantly','แตะเพื่อบันทึกทันที'], add:['Add','เพิ่ม'],
+  todays_spending:["Today's spending",'ใช้จ่ายวันนี้'], budget_used:['Budget used','งบที่ใช้ไป'],
+  recent_entries:['Recent entries','รายการล่าสุด'], view_all:['View all','ดูทั้งหมด'],
+  empty_recent:['Nothing recorded yet — tap + to start your ledger.','ยังไม่มีรายการ — แตะ + เพื่อเริ่มบันทึก'],
+  journal:['Journal','บันทึก'], timeline_title:['Timeline','ไทม์ไลน์'],
+  search_ph:['Search notes, categories, amounts','ค้นหาโน้ต หมวดหมู่ จำนวนเงิน'],
+  all_wallets:['All wallets','ทุกกระเป๋าเงิน'], all_categories:['All categories','ทุกหมวดหมู่'],
+  no_match:['No entries match. Try clearing filters.','ไม่พบรายการ ลองล้างตัวกรองดู'],
+  today:['Today','วันนี้'], yesterday:['Yesterday','เมื่อวาน'],
+  tap_date:['Tap a date to see entries','แตะวันที่เพื่อดูรายการ'], no_entries_day:['No entries this day.','ไม่มีรายการในวันนี้'],
+  this_month:['This month','เดือนนี้'], budget_title:['Budget','งบประมาณ'],
+  spent:['Spent','ใช้ไป'], earned:['Earned','ได้รับ'], net:['Net','สุทธิ'],
+  category_budgets:['Category budgets','งบตามหมวดหมู่'], remaining:['remaining','คงเหลือ'], over_by:['Over by','เกินไป'],
+  smart_insight:['Smart insight','ข้อมูลเชิงลึก'], savings_goal:['Savings goal','เป้าหมายการออม'],
+  goal_reached:['Goal reached — well done!','ถึงเป้าหมายแล้ว — เยี่ยมมาก!'],
+  goal_label:['Goal','เป้าหมาย'],
+  gets_there_amt:['About %s a day gets you there by','ประมาณ %s ต่อวัน จะถึงเป้าภายใน'],
+  of_target:['of','จาก'],
+  you:['You','คุณ'], profile_settings:['Profile & Settings','โปรไฟล์และการตั้งค่า'],
+  recurring:['Recurring','รายการประจำ'], recurring_hint:['Tap an item to edit — the schedule is a free-text field, so irregular pay cycles (like a civil-servant payroll date) work too.','แตะรายการเพื่อแก้ไข — ช่อง "รอบจ่าย" พิมพ์ข้อความอะไรก็ได้ รองรับรอบจ่ายที่ไม่ตายตัว เช่น เงินเดือนราชการ'],
+  add_recurring:['+ Add recurring','+ เพิ่มรายการประจำ'],
+  quick_log_items:['Quick log items','รายการบันทึกด่วน'], add_quick_item:['+ Add quick item','+ เพิ่มรายการด่วน'],
+  quick_log_hint:['These show up as one-tap buttons on Home — for costs you log the exact same way, over and over.','รายการเหล่านี้จะโชว์เป็นปุ่มกดครั้งเดียวบนหน้าแรก — สำหรับค่าใช้จ่ายที่บันทึกซ้ำแบบเดิมบ่อยๆ'],
+  appearance:['Appearance','การแสดงผล'], dark_mode:['Dark mode','โหมดมืด'], accent_color:['Accent color','สีหลัก'],
+  preview:['Preview','ตัวอย่าง'], accent_hint:['Tints the active tab label, Save buttons, filter chips, and the budget ring.','ปรับสีป้ายแท็บที่เลือก ปุ่มบันทึก ชิปตัวกรอง และวงแหวนงบประมาณ'],
+  language:['Language','ภาษา'],
+  export:['Export','ส่งออกข้อมูล'], export_csv:['Export as CSV','ส่งออกเป็น CSV'], backup_json:['Backup as JSON','สำรองข้อมูลเป็น JSON'],
+  footer_tag:['Daily Ledger · a quiet place for your money story','Daily Ledger · พื้นที่เงียบๆ สำหรับเรื่องราวการเงินของคุณ'],
+  tab_expense:['Expense','รายจ่าย'], tab_income:['Income','รายรับ'], tab_transfer:['Transfer','โอนเงิน'],
+  category:['Category','หมวดหมู่'], add_note:['Add a note','เพิ่มโน้ต'], save_entry:['Save entry','บันทึกรายการ'],
+  attach_photo:['Attach receipt photo','แนบรูปใบเสร็จ'],
+  new_wallet:['New wallet','กระเป๋าเงินใหม่'], edit_wallet:['Edit wallet','แก้ไขกระเป๋าเงิน'],
+  wallet_name_ph:['Wallet name','ชื่อกระเป๋าเงิน'], starting_balance:['Starting balance','ยอดเงินเริ่มต้น'],
+  desc_optional:['Description (optional)','คำอธิบาย (ไม่บังคับ)'], icon:['Icon','ไอคอน'], color:['Color','สี'],
+  create_wallet:['Create wallet','สร้างกระเป๋าเงิน'], save_changes:['Save changes','บันทึกการเปลี่ยนแปลง'],
+  delete_wallet:['Delete wallet','ลบกระเป๋าเงิน'], balance:['Balance','ยอดคงเหลือ'], history:['History','ประวัติ'],
+  no_wallet_entries:['No entries in this wallet yet.','ยังไม่มีรายการในกระเป๋าเงินนี้'],
+  insight_less:["You've spent %s% less than last month. Nicely done.",'เดือนนี้ใช้จ่ายน้อยลง %s% จากเดือนก่อน เก่งมาก'],
+  insight_more:['Spending is %s% higher than last month.','เดือนนี้ใช้จ่ายมากขึ้น %s% จากเดือนก่อน'],
+  insight_top:['%s is your top spend this month at %s.','%s เป็นหมวดที่ใช้จ่ายมากสุดเดือนนี้ อยู่ที่ %s'],
+  one_category:['One category','หมวดหนึ่ง'],
+  insight_cat_change:['%s spending %s %s% vs last month.','การใช้จ่ายหมวด %s %s %s% เทียบกับเดือนก่อน'],
+  increased:['increased','เพิ่มขึ้น'], decreased:['decreased','ลดลง'],
+  insight_avg:['Averaging %s per day so far this month.','เฉลี่ย %s ต่อวันในเดือนนี้'],
+  spent_calendar:['Spent','ใช้ไป'], earned_calendar:['Earned','ได้รับ'],
+  edit_quick_item:['Edit quick item','แก้ไขรายการด่วน'], new_quick_item:['New quick item','รายการด่วนใหม่'],
+  qi_name_ph:['Name (e.g. Rent, Coffee)','ชื่อ (เช่น ค่าเช่า, กาแฟ)'], qi_amount_ph:['Amount','จำนวนเงิน'],
+  add_quick_item_btn:['Add quick item','เพิ่มรายการด่วน'], remove:['Remove','ลบ'],
+  toast_wallet_updated:['Wallet updated','อัปเดตกระเป๋าเงินแล้ว'], toast_wallet_created:['Wallet created','สร้างกระเป๋าเงินแล้ว'],
+  toast_wallet_removed:['Wallet removed','ลบกระเป๋าเงินแล้ว'], toast_qty_updated:['Quick item updated','อัปเดตรายการด่วนแล้ว'],
+  toast_qty_added:['Quick item added','เพิ่มรายการด่วนแล้ว'], toast_removed:['Removed','ลบแล้ว'],
+  toast_income_added:['Income added','บันทึกรายรับแล้ว'], toast_expense_added:['Expense added','บันทึกรายจ่ายแล้ว'],
+  toast_transfer_recorded:['Transfer recorded','บันทึกการโอนแล้ว'], toast_csv_exported:['CSV exported','ส่งออก CSV แล้ว'],
+  toast_backup_saved:['Backup saved','สำรองข้อมูลแล้ว'], toast_recurring_updated:['Recurring updated','อัปเดตรายการประจำแล้ว'],
+  toast_recurring_added:['Recurring added','เพิ่มรายการประจำแล้ว'], toast_undo:['Undo','เลิกทำ'],
+  toast_logged:['%s logged','บันทึก %s แล้ว'],
+  err_name:['Give it a name first','ตั้งชื่อก่อนนะ'], err_amount:['Enter an amount first','กรอกจำนวนเงินก่อน'],
+  err_category:['Pick a category','เลือกหมวดหมู่ก่อน'], err_two_wallets:['Pick two different wallets','เลือกกระเป๋าเงินสองใบที่ต่างกัน'],
+  err_keep_wallet:['Keep at least one wallet','ต้องมีกระเป๋าเงินอย่างน้อยหนึ่งใบ'],
+  installments:['Installments','การผ่อนชำระ'],
+  installments_hint:['Track what you\'re paying off — tap "Pay this month" when an installment clears.','ติดตามยอดผ่อนของคุณ — กด "จ่ายงวดนี้" เมื่อจ่ายงวดล่าสุดแล้ว'],
+  add_installment:['+ Add installment','+ เพิ่มรายการผ่อน'],
+  inst_progress:['%s of %s paid','จ่ายแล้ว %s จาก %s งวด'],
+  inst_remaining:['%s left · %s remaining','เหลือ %s งวด · คงเหลือ %s'],
+  inst_completed:['Paid off 🎉','ผ่อนหมดแล้ว 🎉'],
+  pay_this_month:['Pay this month','จ่ายงวดนี้'],
+  new_installment:['New installment','รายการผ่อนใหม่'],
+  edit_installment:['Edit installment','แก้ไขรายการผ่อน'],
+  inst_name_ph:['Name (e.g. iPhone 15, Motorcycle)','ชื่อ (เช่น iPhone 15, มอเตอร์ไซค์)'],
+  total_amount:['Total amount','ยอดรวมทั้งหมด'],
+  num_installments:['Number of installments','จำนวนงวดทั้งหมด'],
+  paid_so_far:['Already paid (installments)','จ่ายไปแล้ว (จำนวนงวด)'],
+  per_installment:['≈ %s per installment','≈ %s ต่องวด'],
+  toast_inst_paid:['Payment logged','บันทึกการจ่ายแล้ว'],
+  toast_inst_saved:['Installment saved','บันทึกรายการผ่อนแล้ว'],
+  toast_inst_added:['Installment added','เพิ่มรายการผ่อนแล้ว'],
+  err_installments_count:['Enter a number of installments','กรอกจำนวนงวด'],
+  import_json:['Import backup','นำเข้าข้อมูลสำรอง'],
+  import_hint:['Restores wallets, transactions, budgets, and everything else from a JSON backup file. This replaces your current data.','กู้คืนกระเป๋าเงิน รายการ งบประมาณ และข้อมูลทั้งหมดจากไฟล์สำรอง JSON การทำเช่นนี้จะแทนที่ข้อมูลปัจจุบันของคุณ'],
+  confirm_import:['This will replace your current data with the backup. Continue?','การทำเช่นนี้จะแทนที่ข้อมูลปัจจุบันด้วยข้อมูลจากไฟล์สำรอง ต้องการดำเนินการต่อไหม?'],
+  err_import_invalid:["That file doesn't look like a Daily Ledger backup.",'ไฟล์นี้ไม่ใช่ไฟล์สำรองของ Daily Ledger'],
+  toast_import_success:['Backup restored','กู้คืนข้อมูลสำเร็จแล้ว'],
+  danger_zone:['Danger zone','โซนอันตราย'],
+  clear_all_data:['Clear all data','ล้างข้อมูลทั้งหมด'],
+  clear_all_hint:['Wipes every wallet, transaction, budget, and setting for this account. This cannot be undone.','ลบข้อมูลทุกอย่างของบัญชีนี้ทั้งหมด — กระเป๋าเงิน รายการ งบประมาณ และการตั้งค่า กู้คืนไม่ได้'],
+  confirm_clear_all:['This deletes everything in this account — every wallet, transaction, and setting — permanently. This cannot be undone. Continue?','การกระทำนี้จะลบทุกอย่างในบัญชีนี้ถาวร — กระเป๋าเงิน รายการ การตั้งค่าทั้งหมด กู้คืนไม่ได้ ยืนยันไหม?'],
+  confirm_clear_all_2:['Really sure? Consider exporting a backup first.','แน่ใจจริงๆ นะ? ลองส่งออกข้อมูลสำรองไว้ก่อนดีไหม'],
+  toast_data_cleared:['All data cleared','ล้างข้อมูลทั้งหมดแล้ว'],
+  toast_server_loaded:['Loaded your saved data','โหลดข้อมูลที่บันทึกไว้แล้ว'],
+  app_tagline:['A quiet place for your money story','พื้นที่เงียบๆ สำหรับเรื่องราวการเงินของคุณ'],
+  email:['Email','อีเมล'], password:['Password','รหัสผ่าน'],
+  sign_in:['Sign in','เข้าสู่ระบบ'], sign_up:['Sign up','สมัครสมาชิก'],
+  no_account:["Don't have an account? Sign up",'ยังไม่มีบัญชี? สมัครสมาชิก'],
+  have_account:['Already have an account? Sign in','มีบัญชีอยู่แล้ว? เข้าสู่ระบบ'],
+  sign_out:['Sign out','ออกจากระบบ'], signed_in_as:['Signed in as','เข้าสู่ระบบด้วย'],
+  account:['Account','บัญชีผู้ใช้'],
+  err_auth_generic:['Something went wrong. Try again.','เกิดข้อผิดพลาด ลองอีกครั้ง'],
+  err_auth_invalid_email:["That email doesn't look right.",'อีเมลไม่ถูกต้อง'],
+  err_auth_weak_password:['Password should be at least 6 characters.','รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร'],
+  err_auth_wrong_password:['Wrong email or password.','อีเมลหรือรหัสผ่านไม่ถูกต้อง'],
+  err_auth_email_in_use:['An account with this email already exists.','มีบัญชีที่ใช้อีเมลนี้อยู่แล้ว'],
+  err_auth_fill:['Enter your email and password.','กรอกอีเมลและรหัสผ่าน'],
+  no_goal_yet:['No savings goal yet','ยังไม่มีเป้าหมายการออม'],
+  no_goal_hint:['Ask me to set one up for you, or add it straight into your data with Import.','บอกให้ผมช่วยตั้งเป้าหมายให้ หรือเพิ่มเองผ่านการ Import ข้อมูล'],
+  style:['Style','สไตล์'], style_soft:['Soft Journal','นุ่มนวล'], style_playful:['Playful','สดใส'], style_cute:['Cute','น่ารัก'],
+};
+function tr(key){ const row = TR[key]; if(!row) return key; return row[state.lang==='th'?1:0]; }
+function trf(key, ...args){ let s = tr(key); args.forEach(a=> s = s.replace('%s', a)); return s; }
+function dLocale(){ return state.lang==='th' ? 'th-TH' : 'en-US'; }
+
+const ICONS = ['wallet','landmark','piggy-bank','credit-card','trending-up','smartphone','plane',
+  'utensils','coffee','car','shopping-bag','heart-pulse','film','receipt','banknote','gift',
+  'map-pin','graduation-cap','paw-print','sparkles','home','dumbbell','book-open','shirt'];
+
+const COLORS = {
+  primary:'var(--primary)', secondary:'var(--secondary)', accent:'var(--accent)'
+};
+const COLOR_INK = { primary:'var(--primary-ink)', secondary:'var(--secondary-ink)', accent:'var(--accent-ink)' };
+
+// Appending a hex alpha suffix directly after a var() reference (e.g. "var(--primary)55")
+// is NOT valid CSS — the browser silently drops the whole declaration. color-mix()
+// is the correct way to get a translucent tint of a CSS custom property's value.
+function mixAlpha(colorVar, alphaHex){
+  const pct = Math.round((parseInt(alphaHex,16)/255)*100);
+  return `color-mix(in srgb, ${colorVar} ${pct}%, transparent)`;
+}
+
+let uid = 1000;
+const newId = () => 'id' + (uid++);
+
+const state = {
+  tab:'home',
+  dark:false,
+  theme:'soft',
+  lang:'en',
+  accentKey:'primary',
+  timelineFilter:{ q:'', walletId:'all', categoryId:'all' },
+  timelineView:'list',
+  calMonth:{ y:new Date().getFullYear(), m:new Date().getMonth() },
+  calSelected: new Date().toISOString().slice(0,10),
+  walletPageId:undefined,
+  walletPageEditing:false,
+  walletEdit:{},
+  addOpen:false,
+  addType:'expense',
+  addSelectedCategory:null,
+  addSelectedWallet:null,
+  addSelectedToWallet:null,
+  qiEditingId:undefined,
+  qiForm:{},
+  lastQuickTxId:null,
+  instEditingId:undefined,
+  instForm:{},
+  lastInstPayment:null,
+  user:null,
+  authMode:'signin',
+  authError:'',
+  authBusy:false,
+
+  quickItems:[
+    {id:'q1', name:'Rent', amount:8500, type:'expense', categoryId:'c7', walletId:'w2', icon:'home'},
+    {id:'q2', name:'Netflix', amount:419, type:'expense', categoryId:'c6', walletId:'w2', icon:'film'},
+    {id:'q3', name:'Phone bill', amount:399, type:'expense', categoryId:'c7', walletId:'w1', icon:'smartphone'},
+    {id:'q4', name:'Coffee', amount:65, type:'expense', categoryId:'c2', walletId:'w1', icon:'coffee'},
+    {id:'q5', name:'Parking', amount:40, type:'expense', categoryId:'c3', walletId:'w1', icon:'car'},
+  ],
+
+  installments:[
+    {id:'i1', name:'iPhone 15 Pro', icon:'smartphone', color:'secondary', totalAmount:35000, installments:10, paid:3, categoryId:'c4', walletId:'w2'},
+    {id:'i2', name:'Motorcycle', icon:'car', color:'accent', totalAmount:60000, installments:24, paid:8, categoryId:'c3', walletId:'w2'},
+  ],
+
+  wallets:[
+    {id:'w1', name:'Cash', type:'Cash', icon:'wallet', color:'primary', initial:3200, desc:'Everyday pocket money'},
+    {id:'w2', name:'KBank', type:'Bank', icon:'landmark', color:'secondary', initial:42500, desc:'Main checking account'},
+    {id:'w3', name:'Savings', type:'Savings', icon:'piggy-bank', color:'accent', initial:68000, desc:'Rainy day fund'},
+    {id:'w4', name:'Japan Trip', type:'Travel Fund', icon:'plane', color:'secondary', initial:12000, desc:'Saving for Tokyo, Oct'},
+  ],
+
+  categories:[
+    {id:'c1', name:'Food', icon:'utensils', color:'accent', type:'expense'},
+    {id:'c2', name:'Drink', icon:'coffee', color:'primary', type:'expense'},
+    {id:'c3', name:'Transport', icon:'car', color:'secondary', type:'expense'},
+    {id:'c4', name:'Shopping', icon:'shopping-bag', color:'accent', type:'expense'},
+    {id:'c5', name:'Health', icon:'heart-pulse', color:'secondary', type:'expense'},
+    {id:'c6', name:'Entertainment', icon:'film', color:'primary', type:'expense'},
+    {id:'c7', name:'Bills', icon:'receipt', color:'accent', type:'expense'},
+    {id:'c8', name:'Travel', icon:'plane', color:'secondary', type:'expense'},
+    {id:'c9', name:'Pets', icon:'paw-print', color:'primary', type:'expense'},
+    {id:'c10', name:'Education', icon:'graduation-cap', color:'accent', type:'expense'},
+    {id:'c11', name:'Salary', icon:'banknote', color:'primary', type:'income'},
+    {id:'c12', name:'Investment', icon:'trending-up', color:'secondary', type:'income'},
+    {id:'c13', name:'Gift', icon:'gift', color:'accent', type:'income'},
+  ],
+
+  transactions:[],
+  budgets:[
+    {categoryId:'c1', limit:6000},
+    {categoryId:'c4', limit:5000},
+    {categoryId:'c3', limit:2000},
+    {categoryId:'c6', limit:1500},
+  ],
+  recurring:[
+    {id:'r1', name:'Netflix', amount:419, type:'expense', categoryId:'c6', walletId:'w2', freq:'Monthly', schedule:'Day 5', icon:'film'},
+    {id:'r2', name:'Rent', amount:8500, type:'expense', categoryId:'c7', walletId:'w2', freq:'Monthly', schedule:'Day 1', icon:'home'},
+    {id:'r3', name:'Insurance', amount:1200, type:'expense', categoryId:'c5', walletId:'w2', freq:'Monthly', schedule:'Day 15', icon:'heart-pulse'},
+    {id:'r4', name:'Phone', amount:399, type:'expense', categoryId:'c7', walletId:'w1', freq:'Monthly', schedule:'Day 20', icon:'smartphone'},
+    {id:'r5', name:'Salary', amount:45000, type:'income', categoryId:'c11', walletId:'w2', freq:'Monthly', schedule:'Government payroll cycle (date varies)', icon:'banknote'},
+  ],
+  goal:{id:'g1', name:'Japan Trip', icon:'plane', color:'secondary', target:100000, walletId:'w4', targetDate:'2026-10-15'},
+};
+
+/* seed demo transactions over the last 14 days */
+(function seed(){
+  const today = new Date();
+  const mk = (daysAgo, h, m, type, catId, walletId, amount, note, toWalletId=null) => {
+    const d = new Date(today); d.setDate(d.getDate()-daysAgo); d.setHours(h,m,0,0);
+    state.transactions.push({id:newId(), type, categoryId:catId, walletId, toWalletId, amount, note, date:d.toISOString(), tag:'', location:''});
+  };
+  mk(0,8,20,'expense','c2','w1',85,'Iced latte');
+  mk(0,12,40,'expense','c1','w1',145,'Khao soi lunch');
+  mk(0,19,5,'expense','c4','w2',890,'New running socks');
+  mk(1,9,0,'expense','c3','w1',40,'BTS fare');
+  mk(1,13,15,'expense','c1','w1',120,'Lunch set');
+  mk(1,20,30,'expense','c6','w2',350,'Movie tickets');
+  mk(2,7,45,'expense','c2','w1',65,'Coffee');
+  mk(2,18,0,'transfer','', 'w2', 500, 'Top up cash wallet', 'w1');
+  mk(3,12,0,'expense','c1','w1',110,'Noodles');
+  mk(3,16,20,'expense','c9','w2',450,'Vet check-up');
+  mk(4,9,10,'expense','c3','w1',60,'Grab ride');
+  mk(4,19,40,'expense','c1','w2',560,'Dinner with friends');
+  mk(5,8,0,'expense','c2','w1',75,'Coffee');
+  mk(5,14,0,'expense','c4','w2',1200,'Book haul');
+  mk(6,10,0,'income','c13','w2',1000,'Birthday gift from mom');
+  mk(7,12,30,'expense','c1','w1',130,'Lunch');
+  mk(8,18,0,'expense','c7','w2',799,'Internet bill');
+  mk(9,8,15,'expense','c2','w1',70,'Coffee');
+  mk(10,13,0,'expense','c1','w1',150,'Lunch');
+  mk(12,9,0,'income','c11','w2',45000,'Monthly salary');
+  mk(13,19,0,'expense','c6','w2',420,'Concert stream pass');
+  mk(20,9,0,'income','c11','w2',45000,'Monthly salary (last month)');
+})();
+
+// Snapshot of the fresh demo data, taken once at load — this is only ever
+// shown before we know who's signed in (or if Firebase isn't reachable at
+// all). Real accounts never keep this data; see resetToBlankData() below.
+const _DEMO_SNAPSHOT = JSON.stringify(buildBackupObject());
+function resetToDemoData(){
+  applyBackup(JSON.parse(_DEMO_SNAPSHOT));
+  state.tab = 'home';
+}
+
+// A genuinely new account should start empty, not with fake demo data.
+// One starter "Cash" wallet is included so Add Transaction has somewhere
+// to point to right away; everything else — transactions, budgets,
+// recurring, quick log items, installments, goal — starts blank.
+function resetToBlankData(){
+  const keepLang = state.lang, keepDark = state.dark, keepAccent = state.accentKey, keepTheme = state.theme;
+  applyBackup({
+    wallets: [{id:newId(), name:'Cash', type:'Cash', icon:'wallet', color:'primary', initial:0, desc:''}],
+    categories: JSON.parse(JSON.stringify(state.categories)), // keep category taxonomy (not personal data)
+    transactions: [],
+    budgets: [],
+    recurring: [],
+    goal: null,
+    quickItems: [],
+    installments: [],
+    accentKey: keepAccent, dark: keepDark, lang: keepLang, theme: keepTheme,
+  });
+  state.tab = 'home';
+}
+
+/* ---------------- HELPERS ---------------- */
+const fmt = n => '฿' + Math.round(n).toLocaleString('en-US');
+const fmtSigned = (n,type) => (type==='income' ? '+ ' : type==='expense' ? '\u2212 ' : '') + fmt(Math.abs(n));
+const catById = id => state.categories.find(c=>c.id===id);
+const walletById = id => state.wallets.find(w=>w.id===id);
+const iconEl = (name) => `<svg class="icon-svg"><use href="#icon-${name}"></use></svg>`;
+
+function walletBalance(id){
+  const w = walletById(id); if(!w) return 0;
+  let bal = w.initial;
+  state.transactions.forEach(t=>{
+    if(t.type==='income' && t.walletId===id) bal += t.amount;
+    if(t.type==='expense' && t.walletId===id) bal -= t.amount;
+    if(t.type==='transfer'){
+      if(t.walletId===id) bal -= t.amount;
+      if(t.toWalletId===id) bal += t.amount;
+    }
+  });
+  return bal;
+}
+function totalBalance(){ return state.wallets.reduce((s,w)=>s+walletBalance(w.id),0); }
+function isSameDay(a,b){ return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate(); }
+function isSameMonth(a,b){ return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth(); }
+function daysAgoDate(n){ const d=new Date(); d.setDate(d.getDate()-n); return d; }
+function spentToday(){
+  const now = new Date();
+  return state.transactions.filter(t=>t.type==='expense' && isSameDay(new Date(t.date), now))
+    .reduce((s,t)=>s+t.amount,0);
+}
+function monthTotals(offsetMonths=0){
+  const ref = new Date(); ref.setMonth(ref.getMonth()-offsetMonths);
+  let income=0, expense=0;
+  const catTotals = {};
+  state.transactions.forEach(t=>{
+    const d = new Date(t.date);
+    if(!isSameMonth(d, ref)) return;
+    if(t.type==='income') income += t.amount;
+    if(t.type==='expense'){ expense += t.amount; catTotals[t.categoryId]=(catTotals[t.categoryId]||0)+t.amount; }
+  });
+  return {income, expense, catTotals};
+}
+function greeting(){
+  const h = new Date().getHours();
+  if(h<5) return tr('greeting_late');
+  if(h<12) return tr('greeting_morning');
+  if(h<17) return tr('greeting_afternoon');
+  if(h<21) return tr('greeting_evening');
+  return tr('greeting_night');
+}
+function showToast(msg, icon='check', action=null){
+  const t = document.getElementById('toast');
+  t.innerHTML = `${iconEl(icon)} <span style="flex:1;">${msg}</span>${action ? `<button onclick="${action.onclick}" style="border:none;background:none;color:var(--bg);font-family:inherit;font-weight:800;font-size:13px;text-decoration:underline;padding:0 0 0 6px;cursor:pointer;">${action.label}</button>` : ''}`;
+  t.classList.add('show');
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(()=>t.classList.remove('show'), action ? 4000 : 2200);
+}
+
+/* ---------------- RENDER: HOME ---------------- */
+function renderHome(){
+  const bal = totalBalance();
+  const today = spentToday();
+  const m = monthTotals();
+  const recent = [...state.transactions].sort((a,b)=> new Date(b.date)-new Date(a.date)).slice(0,5);
+
+  const budgetTotal = state.budgets.reduce((s,b)=>s+b.limit,0);
+  const budgetSpent = state.budgets.reduce((s,b)=>s+(m.catTotals[b.categoryId]||0),0);
+  const budgetPct = Math.min(100, Math.round((budgetSpent/budgetTotal)*100));
+
+  return `
+  <div class="topbar">
+    <div class="eyebrow">${greeting()}</div>
+    <div class="serif" style="font-size:15px; font-weight:500; margin-top:2px;">${tr('home_sub')}</div>
+  </div>
+
+  <div style="padding:14px 20px 4px;">
+    <div class="card fade-in" style="padding:26px 24px; text-align:center;">
+      <div class="eyebrow">${tr('total_balance')}</div>
+      <div class="serif" style="font-size:clamp(28px,10vw,44px); font-weight:600; margin-top:6px; word-break:break-word;">${fmt(bal)}</div>
+      <div style="display:flex; justify-content:center; gap:22px; margin-top:16px;">
+        <div style="text-align:center; min-width:0;">
+          <div style="font-size:11px; color:var(--text-soft); font-weight:700;">${tr('this_month_in')}</div>
+          <div style="font-weight:800; color:var(--pos); font-size:clamp(12px,3.6vw,15px); word-break:break-word;">+${fmt(m.income)}</div>
+        </div>
+        <div style="width:1px; background:var(--border); flex-shrink:0;"></div>
+        <div style="text-align:center; min-width:0;">
+          <div style="font-size:11px; color:var(--text-soft); font-weight:700;">${tr('this_month_out')}</div>
+          <div style="font-weight:800; color:var(--neg); font-size:clamp(12px,3.6vw,15px); word-break:break-word;">-${fmt(m.expense)}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:18px 0 4px;">
+    <div style="display:flex; align-items:center; justify-content:space-between; padding:0 20px 10px;">
+      <div class="eyebrow">${tr('wallets')}</div>
+      <button onclick="switchTab('profile')" style="border:none;background:none;font-size:11px;font-weight:700;color:var(--text-soft);">${tr('manage')}</button>
+    </div>
+    <div class="wallet-scroll">
+      ${state.wallets.map(w=>`
+        <div class="wallet-card" onclick="openWalletPage('${w.id}')" style="background:linear-gradient(135deg, ${COLORS[w.color]}, ${mixAlpha(COLORS[w.color], 'CC')});">
+          <div class="wtop">
+            <div class="wicon">${iconEl(w.icon)}</div>
+            <span style="font-size:10px; font-weight:800; letter-spacing:.04em; text-transform:uppercase; opacity:.7;">${w.type}</span>
+          </div>
+          <div style="z-index:1; min-width:0;">
+            <div style="font-size:12.5px; font-weight:700; opacity:.85;">${w.name}</div>
+            <div class="serif" style="font-size:clamp(17px,6vw,24px); font-weight:600; word-break:break-word;">${fmt(walletBalance(w.id))}</div>
+          </div>
+        </div>
+      `).join('')}
+      <div class="wallet-add" onclick="openWalletPage(null)">
+        ${iconEl('plus')}
+        ${tr('add_wallet')}
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:8px 0 4px;">
+    <div style="display:flex; align-items:center; justify-content:space-between; padding:0 20px 10px;">
+      <div class="eyebrow">${tr('quick_log')}</div>
+      <span style="font-size:11px; color:var(--text-soft); font-weight:600;">${tr('tap_to_log')}</span>
+    </div>
+    <div class="wallet-scroll" style="padding-top:0;">
+      ${state.quickItems.map(q=>`
+        <div class="quick-pill" onclick="quickLogItem('${q.id}')">
+          <div class="icon-chip" style="background:${mixAlpha(COLORS[catById(q.categoryId)?.color||'primary'], '55')}; color:${COLOR_INK[catById(q.categoryId)?.color||'primary']};">${iconEl(q.icon)}</div>
+          <div style="min-width:0;">
+            <div style="font-weight:700; font-size:12.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${q.name}</div>
+            <div style="font-size:11px; color:var(--text-soft); font-weight:600;">${q.type==='income'?'+':'\u2212'} ${fmt(q.amount)}</div>
+          </div>
+        </div>
+      `).join('')}
+      <div class="quick-pill" style="border:1.5px dashed var(--border); justify-content:center; background:transparent;" onclick="openQiSheet(null)">
+        ${iconEl('plus')}
+        <span style="font-size:11.5px; font-weight:700; color:var(--text-soft);">${tr('add')}</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:14px 20px 4px; display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+    <div class="card fade-in" style="padding:18px; min-width:0;">
+      <div class="eyebrow">${tr('todays_spending')}</div>
+      <div class="serif" style="font-size:clamp(18px,6vw,26px); margin-top:6px; word-break:break-word;">${fmt(today)}</div>
+    </div>
+    <div class="card fade-in" style="padding:18px; min-width:0;">
+      <div class="eyebrow">${tr('budget_used')}</div>
+      <div class="serif" style="font-size:clamp(18px,6vw,26px); margin-top:6px;">${budgetPct}%</div>
+      <div class="progress-track" style="margin-top:8px;">
+        <div class="progress-fill" style="width:${budgetPct}%; background:${budgetPct>90?'var(--neg)':'var(--accent-color)'};"></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:20px 0 4px;">
+    <div style="display:flex; align-items:center; justify-content:space-between; padding:0 20px 12px;">
+      <div class="eyebrow">${tr('recent_entries')}</div>
+      <button onclick="switchTab('timeline')" style="border:none;background:none;font-size:11px;font-weight:700;color:var(--text-soft);">${tr('view_all')}</button>
+    </div>
+    <div class="card fade-in" style="margin:0 20px; padding:6px 16px;">
+      ${recent.map((t,i)=>renderTxRow(t, i===recent.length-1)).join('') || emptyRow()}
+    </div>
+  </div>
+  `;
+}
+
+function emptyRow(){
+  return `<div style="padding:22px 4px; text-align:center; color:var(--text-soft); font-size:13px;">${tr('empty_recent')}</div>`;
+}
+
+function renderTxRow(t, isLast){
+  let icon, label, color, sub;
+  if(t.type==='transfer'){
+    icon='send'; label = `${walletById(t.walletId)?.name || '—'} → ${walletById(t.toWalletId)?.name || '—'}`;
+    color='secondary'; sub = t.note || tr('tab_transfer');
+  } else {
+    const c = catById(t.categoryId);
+    icon = c?.icon || 'circle'; label = c?.name || '—'; color = c?.color || 'primary';
+    sub = t.note ? t.note : walletById(t.walletId)?.name || '';
+  }
+  const time = new Date(t.date).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+  return `
+  <div style="display:flex; align-items:center; gap:12px; padding:12px 0; ${isLast?'':'border-bottom:1px solid var(--border);'}">
+    <div class="icon-chip" style="background:${mixAlpha(COLORS[color], '55')}; color:${COLOR_INK[color]};">${iconEl(icon)}</div>
+    <div style="flex:1; min-width:0;">
+      <div style="font-weight:700; font-size:14px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${label}</div>
+      <div style="font-size:11.5px; color:var(--text-soft); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${sub} · ${time}</div>
+    </div>
+    <div style="font-weight:800; font-size:14px; color:${t.type==='income'?'var(--pos)': t.type==='expense'?'var(--neg)':'var(--text)'}; flex-shrink:0;">
+      ${fmtSigned(t.amount, t.type)}
+    </div>
+  </div>`;
+}
+
+/* ---------------- RENDER: TIMELINE ---------------- */
+function monthTotalsFor(y, m){
+  let income=0, expense=0;
+  const catTotals = {};
+  const dayHas = {}; // 'YYYY-MM-DD' -> {income:bool, expense:bool}
+  state.transactions.forEach(t=>{
+    const d = new Date(t.date);
+    if(d.getFullYear()!==y || d.getMonth()!==m) return;
+    const key = d.toISOString().slice(0,10);
+    dayHas[key] = dayHas[key] || {income:false, expense:false};
+    if(t.type==='income'){ income += t.amount; dayHas[key].income = true; }
+    if(t.type==='expense'){ expense += t.amount; catTotals[t.categoryId]=(catTotals[t.categoryId]||0)+t.amount; dayHas[key].expense = true; }
+  });
+  return {income, expense, catTotals, dayHas};
+}
+function renderTlRow(t){
+  const time = new Date(t.date).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+  let icon,label,color,sub;
+  if(t.type==='transfer'){ icon='send'; label=`${walletById(t.walletId)?.name||'—'} → ${walletById(t.toWalletId)?.name||'—'}`; color='secondary'; sub=t.note||tr('tab_transfer'); }
+  else { const c=catById(t.categoryId); icon=c?.icon||'circle'; label=c?.name||'—'; color=c?.color||'primary'; sub = (t.note? t.note+' · ':'') + (walletById(t.walletId)?.name||''); }
+  const media = t.photo
+    ? `<img src="${t.photo}" class="photo-thumb">`
+    : `<div class="icon-chip" style="width:36px;height:36px;background:${mixAlpha(COLORS[color], '55')}; color:${COLOR_INK[color]};">${iconEl(icon)}</div>`;
+  return `
+  <div class="tl-row">
+    <div class="tl-time">${time}</div>
+    ${media}
+    <div style="flex:1; min-width:0;">
+      <div style="font-weight:700; font-size:13.5px;">${label}</div>
+      <div style="font-size:11px; color:var(--text-soft); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${sub}</div>
+    </div>
+    <div style="font-weight:800; font-size:13.5px; color:${t.type==='income'?'var(--pos)': t.type==='expense'?'var(--neg)':'var(--text)'};">${fmtSigned(t.amount,t.type)}</div>
+  </div>`;
+}
+
+function renderTimelineList(){
+  const f = state.timelineFilter;
+  let list = [...state.transactions].sort((a,b)=> new Date(b.date)-new Date(a.date));
+  if(f.walletId!=='all') list = list.filter(t=> t.walletId===f.walletId || t.toWalletId===f.walletId);
+  if(f.categoryId!=='all') list = list.filter(t=> t.categoryId===f.categoryId);
+  if(f.q.trim()){
+    const q = f.q.toLowerCase();
+    list = list.filter(t=>{
+      const c = catById(t.categoryId);
+      return (t.note||'').toLowerCase().includes(q) || (c?.name||'').toLowerCase().includes(q) || String(t.amount).includes(q);
+    });
+  }
+
+  const groups = {};
+  list.forEach(t=>{
+    const d = new Date(t.date);
+    const key = d.toDateString();
+    (groups[key] = groups[key] || []).push(t);
+  });
+
+  const dayLabel = (d) => {
+    const now = new Date();
+    if(isSameDay(d, now)) return tr('today');
+    const y = new Date(now); y.setDate(y.getDate()-1);
+    if(isSameDay(d, y)) return tr('yesterday');
+    return d.toLocaleDateString(dLocale(),{weekday:'long', month:'short', day:'numeric'});
+  };
+
+  const groupsHtml = Object.keys(groups).map(key=>{
+    const items = groups[key];
+    const d = new Date(items[0].date);
+    const net = items.reduce((s,t)=> s + (t.type==='income'?t.amount: t.type==='expense'?-t.amount:0), 0);
+    return `
+    <div class="day-group fade-in">
+      <div class="day-head">
+        <div class="day-title">${dayLabel(d)}</div>
+        <div class="day-sub">${net>=0?'+':'\u2212'}${fmt(Math.abs(net))}</div>
+      </div>
+      <div class="card" style="padding:4px 16px;">
+        ${items.map(renderTlRow).join('')}
+      </div>
+    </div>`;
+  }).join('');
+
+  return `
+  <div style="padding:8px 20px 14px;">
+    <div class="card" style="display:flex; align-items:center; gap:10px; padding:12px 16px;">
+      ${iconEl('search')}
+      <input id="tlSearch" placeholder="${tr('search_ph')}" value="${f.q}"
+        style="border:none; outline:none; background:transparent; font-family:inherit; font-size:13.5px; width:100%; color:var(--text); font-weight:600;">
+    </div>
+  </div>
+
+  <div style="display:flex; gap:8px; padding:0 20px 16px; overflow-x:auto;">
+    <div class="chip ${f.walletId==='all'?'active':''}" onclick="setTlFilter('walletId','all')">${tr('all_wallets')}</div>
+    ${state.wallets.map(w=>`<div class="chip ${f.walletId===w.id?'active':''}" onclick="setTlFilter('walletId','${w.id}')">${w.name}</div>`).join('')}
+  </div>
+  <div style="display:flex; gap:8px; padding:0 20px 18px; overflow-x:auto;">
+    <div class="chip ${f.categoryId==='all'?'active':''}" onclick="setTlFilter('categoryId','all')">${tr('all_categories')}</div>
+    ${state.categories.filter(c=>c.type==='expense').map(c=>`<div class="chip ${f.categoryId===c.id?'active':''}" onclick="setTlFilter('categoryId','${c.id}')">${c.name}</div>`).join('')}
+  </div>
+
+  ${groupsHtml || `<div style="padding:40px 20px; text-align:center; color:var(--text-soft);">${iconEl('search-x')}<div style="margin-top:8px; font-size:13px;">${tr('no_match')}</div></div>`}
+  `;
+}
+
+function renderCalendarView(){
+  const {y,m} = state.calMonth;
+  const monthDate = new Date(y,m,1);
+  const monthLabel = monthDate.toLocaleDateString(dLocale(),{month:'long', year:'numeric'});
+  const firstWeekday = monthDate.getDay();
+  const daysInMonth = new Date(y,m+1,0).getDate();
+  const prevMonthDays = new Date(y,m,0).getDate();
+  const mt = monthTotalsFor(y,m);
+  const todayKey = new Date().toISOString().slice(0,10);
+  const dow = state.lang==='th' ? ['อา','จ','อ','พ','พฤ','ศ','ส'] : ['S','M','T','W','T','F','S'];
+
+  let cells = '';
+  for(let i=0;i<firstWeekday;i++){
+    const dayNum = prevMonthDays - firstWeekday + 1 + i;
+    cells += `<div class="cal-cell faded"><div class="num">${dayNum}</div></div>`;
+  }
+  for(let d=1; d<=daysInMonth; d++){
+    const dateObj = new Date(y,m,d);
+    const key = dateObj.toISOString().slice(0,10);
+    const has = mt.dayHas[key];
+    const isToday = key===todayKey;
+    const isSelected = key===state.calSelected;
+    cells += `
+      <div class="cal-cell ${isToday?'today':''} ${isSelected?'selected':''}" onclick="calSelectDay('${key}')">
+        <div class="num">${d}</div>
+        <div class="cal-dots">
+          ${has?.income ? `<div class="cal-dot" style="background:${isSelected?'var(--bg)':'var(--pos)'};"></div>`:''}
+          ${has?.expense ? `<div class="cal-dot" style="background:${isSelected?'var(--bg)':'var(--neg)'};"></div>`:''}
+        </div>
+      </div>`;
+  }
+  const totalCells = firstWeekday + daysInMonth;
+  const trailing = (7 - (totalCells % 7)) % 7;
+  for(let i=1;i<=trailing;i++){
+    cells += `<div class="cal-cell faded"><div class="num">${i}</div></div>`;
+  }
+
+  const selectedItems = state.calSelected
+    ? state.transactions.filter(t=> new Date(t.date).toISOString().slice(0,10)===state.calSelected)
+        .sort((a,b)=> new Date(b.date)-new Date(a.date))
+    : [];
+  const selLabel = state.calSelected ? new Date(state.calSelected+'T12:00:00').toLocaleDateString(dLocale(),{weekday:'long', month:'short', day:'numeric'}) : '';
+
+  return `
+  <div style="padding:8px 20px 4px;">
+    <div class="card" style="padding:20px 16px; display:flex; justify-content:space-between; gap:8px;">
+      <div style="flex:1; min-width:0;">
+        <div class="eyebrow">${tr('spent_calendar')}</div>
+        <div class="serif" style="font-size:clamp(15px,5.2vw,20px); word-break:break-word; margin-top:2px;">${fmt(mt.expense)}</div>
+      </div>
+      <div style="width:1px; background:var(--border); flex-shrink:0;"></div>
+      <div style="flex:1; min-width:0;">
+        <div class="eyebrow">${tr('earned_calendar')}</div>
+        <div class="serif" style="font-size:clamp(15px,5.2vw,20px); word-break:break-word; margin-top:2px;">${fmt(mt.income)}</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex; align-items:center; justify-content:space-between; padding:16px 20px 10px;">
+    <button onclick="calShiftMonth(-1)" style="border:none;background:var(--card);border:1px solid var(--border);border-radius:12px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;color:var(--text-soft);">${iconEl('chevron-left')}</button>
+    <div class="serif" style="font-size:16px; font-weight:600;">${monthLabel}</div>
+    <button onclick="calShiftMonth(1)" style="border:none;background:var(--card);border:1px solid var(--border);border-radius:12px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;color:var(--text-soft);">${iconEl('chevron-right')}</button>
+  </div>
+
+  <div style="padding:0 20px 6px;">
+    <div class="cal-grid" style="margin-bottom:2px;">
+      ${dow.map(d=>`<div class="cal-dow">${d}</div>`).join('')}
+    </div>
+    <div class="cal-grid">${cells}</div>
+  </div>
+
+  <div style="padding:22px 20px 4px;">
+    <div class="eyebrow" style="margin-bottom:10px;">${state.calSelected ? selLabel : tr('tap_date')}</div>
+    ${selectedItems.length ? `<div class="card" style="padding:2px 16px;">${selectedItems.map(renderTlRow).join('')}</div>`
+      : state.calSelected ? `<div style="padding:20px 4px; color:var(--text-soft); font-size:13px;">${tr('no_entries_day')}</div>` : ''}
+  </div>
+  `;
+}
+window.calShiftMonth = (dir)=>{
+  let {y,m} = state.calMonth;
+  m += dir;
+  if(m<0){ m=11; y-=1; } else if(m>11){ m=0; y+=1; }
+  state.calMonth = {y,m};
+  renderTimelineListOnly();
+};
+window.calSelectDay = (key)=>{ state.calSelected = key; renderTimelineListOnly(); };
+window.setTimelineView = (v)=>{ state.timelineView = v; render(); };
+
+function renderTimeline(){
+  return `
+  <div class="topbar">
+    <div style="display:flex; align-items:center; justify-content:space-between;">
+      <div>
+        <div class="eyebrow">${tr('journal')}</div>
+        <div class="serif" style="font-size:22px; font-weight:600; margin-top:2px;">${tr('timeline_title')}</div>
+      </div>
+      <div class="segmented" style="width:auto; padding:3px;">
+        <button class="${state.timelineView==='list'?'active':''}" onclick="setTimelineView('list')" style="padding:8px 12px; display:flex; align-items:center;">${iconEl('list')}</button>
+        <button class="${state.timelineView==='calendar'?'active':''}" onclick="setTimelineView('calendar')" style="padding:8px 12px; display:flex; align-items:center;">${iconEl('calendar')}</button>
+      </div>
+    </div>
+  </div>
+  <div id="timelineBody">${state.timelineView==='calendar' ? renderCalendarView() : renderTimelineList()}</div>
+  `;
+}
+window.setTlFilter = (key,val) => { state.timelineFilter[key]=val; render(); };
+
+/* ---------------- RENDER: BUDGET ---------------- */
+function insights(){
+  const m0 = monthTotals(0), m1 = monthTotals(1);
+  const out = [];
+  if(m1.expense>0){
+    const diff = Math.round(((m0.expense - m1.expense)/m1.expense)*100);
+    if(diff<=-3) out.push({icon:'trending-down', text:trf('insight_less', Math.abs(diff))});
+    else if(diff>=3) out.push({icon:'trending-up', text:trf('insight_more', diff)});
+  }
+  // biggest category
+  const cats = Object.entries(m0.catTotals).sort((a,b)=>b[1]-a[1]);
+  if(cats.length){
+    const top = catById(cats[0][0]);
+    out.push({icon:'flame', text:trf('insight_top', top?.name || tr('one_category'), fmt(cats[0][1]))});
+  }
+  // category vs last month
+  Object.keys(m0.catTotals).forEach(cid=>{
+    const cur = m0.catTotals[cid]||0, prev = m1.catTotals[cid]||0;
+    if(prev>0){
+      const d = Math.round(((cur-prev)/prev)*100);
+      if(Math.abs(d)>=25){
+        const c = catById(cid);
+        out.push({icon: d>0?'arrow-up-right':'arrow-down-right', text:trf('insight_cat_change', c?.name, d>0?tr('increased'):tr('decreased'), Math.abs(d))});
+      }
+    }
+  });
+  const days = new Date().getDate();
+  out.push({icon:'calendar-days', text:trf('insight_avg', fmt(m0.expense/Math.max(1,days)))});
+  return out.slice(0,4);
+}
+
+function renderBudget(){
+  const m = monthTotals();
+  const list = insights();
+
+  return `
+  <div class="topbar">
+    <div class="eyebrow">${tr('this_month')}</div>
+    <div class="serif" style="font-size:22px; font-weight:600; margin-top:2px;">${tr('budget_title')}</div>
+  </div>
+
+  <div style="padding:8px 20px 4px;">
+    <div class="card" style="padding:20px 16px; display:flex; justify-content:space-between; gap:8px;">
+      <div style="flex:1; min-width:0;">
+        <div class="eyebrow">${tr('spent')}</div>
+        <div class="serif" style="font-size:clamp(15px,5.2vw,22px); line-height:1.25; word-break:break-word; margin-top:2px;">${fmt(m.expense)}</div>
+      </div>
+      <div style="width:1px; background:var(--border); flex-shrink:0;"></div>
+      <div style="flex:1; min-width:0;">
+        <div class="eyebrow">${tr('earned')}</div>
+        <div class="serif" style="font-size:clamp(15px,5.2vw,22px); line-height:1.25; word-break:break-word; margin-top:2px;">${fmt(m.income)}</div>
+      </div>
+      <div style="width:1px; background:var(--border); flex-shrink:0;"></div>
+      <div style="flex:1; min-width:0;">
+        <div class="eyebrow">${tr('net')}</div>
+        <div class="serif" style="font-size:clamp(15px,5.2vw,22px); line-height:1.25; word-break:break-word; margin-top:2px; color:${m.income-m.expense>=0?'var(--pos)':'var(--neg)'};">${fmt(m.income-m.expense)}</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:20px 20px 4px;">
+    <div class="eyebrow" style="margin-bottom:10px;">${tr('category_budgets')}</div>
+    <div class="card" style="padding:6px 18px;">
+      ${state.budgets.map((b,i)=>{
+        const c = catById(b.categoryId);
+        const spent = m.catTotals[b.categoryId]||0;
+        const pct = Math.min(100, Math.round((spent/b.limit)*100));
+        const over = spent>b.limit;
+        return `
+        <div style="padding:16px 0; ${i===state.budgets.length-1?'':'border-bottom:1px solid var(--border);'}">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <div class="icon-chip" style="width:34px;height:34px;background:${mixAlpha(COLORS[c.color], '55')}; color:${COLOR_INK[c.color]};">${iconEl(c.icon)}</div>
+              <div style="font-weight:700; font-size:13.5px;">${c.name}</div>
+            </div>
+            <div style="font-size:12.5px; font-weight:700; color:${over?'var(--neg)':'var(--text-soft)'};">${fmt(spent)} / ${fmt(b.limit)}</div>
+          </div>
+          <div class="progress-track"><div class="progress-fill" style="width:${pct}%; background:${over?'var(--neg)':COLORS[c.color]};"></div></div>
+          <div style="font-size:11px; color:var(--text-soft); margin-top:5px;">${over? tr('over_by')+' '+fmt(spent-b.limit) : fmt(b.limit-spent)+' '+tr('remaining')}</div>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>
+
+  <div style="padding:20px 20px 4px;">
+    <div class="eyebrow" style="margin-bottom:10px;">${tr('smart_insight')}</div>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      ${list.map(x=>`
+        <div class="card fade-in" style="padding:14px 16px; display:flex; align-items:center; gap:12px;">
+          <div class="icon-chip" style="background:var(--accent-color)33; color:var(--accent-color-ink); width:36px; height:36px;">${iconEl(x.icon)}</div>
+          <div style="font-size:13px; font-weight:600; line-height:1.4;">${x.text}</div>
+        </div>`).join('')}
+    </div>
+  </div>
+
+  <div style="padding:22px 20px 4px;">
+    <div class="eyebrow" style="margin-bottom:10px;">${tr('savings_goal')}</div>
+    ${renderGoalCard()}
+  </div>
+  `;
+}
+
+function renderGoalCard(){
+  const g = state.goal;
+  if(!g){
+    return `
+    <div class="card fade-in" style="padding:26px 22px; text-align:center;">
+      <div class="icon-chip" style="margin:0 auto 12px; background:var(--accent-color)33; color:var(--accent-color-ink);">${iconEl('sparkles')}</div>
+      <div style="font-weight:700; font-size:13.5px;">${tr('no_goal_yet')}</div>
+      <div style="font-size:12px; color:var(--text-soft); margin-top:6px; line-height:1.5;">${tr('no_goal_hint')}</div>
+    </div>`;
+  }
+  const current = Math.max(0, walletBalance(g.walletId));
+  const pct = Math.min(100, Math.round((current/g.target)*100));
+  const remaining = Math.max(0, g.target-current);
+  const target = new Date(g.targetDate);
+  const daysLeft = Math.max(1, Math.ceil((target-new Date())/(1000*60*60*24)));
+  const perDay = remaining/daysLeft;
+  return `
+  <div class="card fade-in" style="padding:22px; background:linear-gradient(135deg, ${mixAlpha(COLORS[g.color], '44')}, var(--card));">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+      <div>
+        <div class="eyebrow">${tr('goal_label')}</div>
+        <div class="serif" style="font-size:20px; font-weight:600; margin-top:2px;">${g.name}</div>
+      </div>
+      <div class="icon-chip" style="background:${mixAlpha(COLORS[g.color], '55')}; color:${COLOR_INK[g.color]};">${iconEl(g.icon)}</div>
+    </div>
+    <div style="margin-top:16px; display:flex; justify-content:space-between; align-items:baseline;">
+      <span class="serif" style="font-size:clamp(18px,6vw,24px); word-break:break-word;">${fmt(current)}</span>
+      <span style="font-size:12px; color:var(--text-soft); font-weight:700;">${tr('of_target')} ${fmt(g.target)}</span>
+    </div>
+    <div class="progress-track" style="margin-top:10px;"><div class="progress-fill" style="width:${pct}%; background:${COLORS[g.color]};"></div></div>
+    <div style="font-size:11.5px; color:var(--text-soft); margin-top:8px;">
+      ${pct>=100? tr('goal_reached') : `${trf('gets_there_amt', fmt(perDay))} ${target.toLocaleDateString(dLocale(),{month:'short', day:'numeric', year:'numeric'})}.`}
+    </div>
+  </div>`;
+}
+
+/* ---------------- RENDER: PROFILE ---------------- */
+function renderProfile(){
+  return `
+  <div class="topbar">
+    <div class="eyebrow">${tr('you')}</div>
+    <div class="serif" style="font-size:22px; font-weight:600; margin-top:2px;">${tr('profile_settings')}</div>
+  </div>
+
+  <div style="padding:8px 20px 4px;">
+    <div class="eyebrow" style="margin-bottom:10px;">${tr('account')}</div>
+    <div class="card" style="padding:16px 18px; display:flex; align-items:center; gap:12px;">
+      <div class="icon-chip" style="background:var(--accent-color)33; color:var(--accent-color-ink);">${iconEl('circle-user-round')}</div>
+      <div style="flex:1; min-width:0;">
+        <div style="font-size:10.5px; color:var(--text-soft); font-weight:700; text-transform:uppercase; letter-spacing:.04em;">${tr('signed_in_as')}</div>
+        <div style="font-weight:700; font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${state.user?.email || ''}</div>
+      </div>
+      <button onclick="doSignOut()" style="border:1px solid var(--border); background:var(--card); color:var(--neg); font-family:inherit; font-weight:700; font-size:12px; padding:9px 14px; border-radius:12px; cursor:pointer; flex-shrink:0;">${tr('sign_out')}</button>
+    </div>
+  </div>
+
+  <div style="padding:20px 20px 4px;">
+    <div class="eyebrow" style="margin-bottom:10px;">${tr('wallets')}</div>
+    <div class="card" style="padding:4px 18px;">
+      ${state.wallets.map((w,i)=>`
+        <div style="display:flex; align-items:center; gap:12px; padding:14px 0; ${i===state.wallets.length-1?'':'border-bottom:1px solid var(--border);'}">
+          <div onclick="openWalletPage('${w.id}')" style="display:flex; align-items:center; gap:12px; flex:1; min-width:0; cursor:pointer;">
+            <div class="icon-chip" style="background:${mixAlpha(COLORS[w.color], '55')}; color:${COLOR_INK[w.color]};">${iconEl(w.icon)}</div>
+            <div style="flex:1; min-width:0;">
+              <div style="font-weight:700; font-size:13.5px;">${w.name}</div>
+              <div style="font-size:11px; color:var(--text-soft);">${w.type} · ${fmt(walletBalance(w.id))}</div>
+            </div>
+          </div>
+          <div style="display:flex; gap:2px; flex-shrink:0;">
+            <button onclick="moveWallet('${w.id}',-1)" style="border:none;background:none;color:var(--text-soft);padding:6px;">${iconEl('chevron-up')}</button>
+            <button onclick="moveWallet('${w.id}',1)" style="border:none;background:none;color:var(--text-soft);padding:6px;">${iconEl('chevron-down')}</button>
+          </div>
+        </div>`).join('')}
+      <div style="padding:14px 0;">
+        <button onclick="openWalletPage(null)" style="width:100%; border:1.5px dashed var(--border); background:none; border-radius:14px; padding:12px; font-family:inherit; font-weight:700; font-size:13px; color:var(--text-soft); cursor:pointer;">${tr('add_wallet')}</button>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:20px 20px 4px;">
+    <div class="eyebrow" style="margin-bottom:10px;">${tr('recurring')}</div>
+    <div class="card" style="padding:4px 18px;">
+      ${state.recurring.map((r,i)=>`
+        <div style="display:flex; align-items:center; gap:10px; padding:13px 0; ${i===state.recurring.length-1?'':'border-bottom:1px solid var(--border);'}">
+          <div onclick="editRecurring('${r.id}')" style="display:flex; align-items:center; gap:12px; flex:1; min-width:0; cursor:pointer;">
+            <div class="icon-chip" style="background:${COLORS.secondary}55; color:${COLOR_INK.secondary};">${iconEl(r.icon)}</div>
+            <div style="flex:1; min-width:0;">
+              <div style="font-weight:700; font-size:13.5px;">${r.name}</div>
+              <div style="font-size:11px; color:var(--text-soft); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${r.freq} · ${r.schedule} · ${walletById(r.walletId)?.name || ''}</div>
+            </div>
+          </div>
+          <div style="font-weight:800; font-size:13px; color:${r.type==='income'?'var(--pos)':'var(--neg)'}; flex-shrink:0;">${r.type==='income'?'+':'\u2212'} ${fmt(r.amount)}</div>
+          <button onclick="event.stopPropagation(); deleteRecurringPrompt('${r.id}')" style="border:none;background:none;color:var(--text-soft);padding:4px; flex-shrink:0;">${iconEl('trash-2')}</button>
+        </div>`).join('')}
+      <div style="padding:14px 0;">
+        <button onclick="addRecurring()" style="width:100%; border:1.5px dashed var(--border); background:none; border-radius:14px; padding:12px; font-family:inherit; font-weight:700; font-size:13px; color:var(--text-soft); cursor:pointer;">${tr('add_recurring')}</button>
+      </div>
+    </div>
+    <div style="font-size:11px; color:var(--text-soft); padding:8px 4px 0;">${tr('recurring_hint')}</div>
+  </div>
+
+  <div style="padding:20px 20px 4px;">
+    <div class="eyebrow" style="margin-bottom:10px;">${tr('quick_log_items')}</div>
+    <div class="card" style="padding:4px 18px;">
+      ${state.quickItems.map((q,i)=>`
+        <div onclick="openQiSheet('${q.id}')" style="display:flex; align-items:center; gap:12px; padding:12px 0; cursor:pointer; ${i===state.quickItems.length-1?'':'border-bottom:1px solid var(--border);'}">
+          <div class="icon-chip" style="background:${mixAlpha(COLORS[catById(q.categoryId)?.color||'primary'], '55')}; color:${COLOR_INK[catById(q.categoryId)?.color||'primary']};">${iconEl(q.icon)}</div>
+          <div style="flex:1; min-width:0;">
+            <div style="font-weight:700; font-size:13.5px;">${q.name}</div>
+            <div style="font-size:11px; color:var(--text-soft);">${catById(q.categoryId)?.name||''} · ${walletById(q.walletId)?.name||''}</div>
+          </div>
+          <div style="font-weight:800; font-size:13px; color:${q.type==='income'?'var(--pos)':'var(--neg)'};">${q.type==='income'?'+':'\u2212'} ${fmt(q.amount)}</div>
+        </div>`).join('')}
+      <div style="padding:12px 0;">
+        <button onclick="openQiSheet(null)" style="width:100%; border:1.5px dashed var(--border); background:none; border-radius:14px; padding:12px; font-family:inherit; font-weight:700; font-size:13px; color:var(--text-soft); cursor:pointer;">${tr('add_quick_item')}</button>
+      </div>
+    </div>
+    <div style="font-size:11px; color:var(--text-soft); padding:8px 4px 0;">${tr('quick_log_hint')}</div>
+  </div>
+
+  <div style="padding:20px 20px 4px;">
+    <div class="eyebrow" style="margin-bottom:10px;">${tr('installments')}</div>
+    <div class="card" style="padding:4px 18px;">
+      ${state.installments.map((inst,i)=>{
+        const perInst = Math.round(inst.totalAmount / inst.installments);
+        const remainingCount = Math.max(0, inst.installments - inst.paid);
+        const remainingAmount = Math.max(0, inst.totalAmount - inst.paid*perInst);
+        const pct = Math.min(100, Math.round((inst.paid/inst.installments)*100));
+        const done = inst.paid >= inst.installments;
+        return `
+        <div style="padding:14px 0; ${i===state.installments.length-1?'':'border-bottom:1px solid var(--border);'}">
+          <div onclick="openInstSheet('${inst.id}')" style="display:flex; align-items:center; gap:12px; cursor:pointer;">
+            <div class="icon-chip" style="background:${mixAlpha(COLORS[inst.color], '55')}; color:${COLOR_INK[inst.color]};">${iconEl(inst.icon)}</div>
+            <div style="flex:1; min-width:0;">
+              <div style="font-weight:700; font-size:13.5px;">${inst.name}</div>
+              <div style="font-size:11px; color:var(--text-soft);">${trf('inst_progress', inst.paid, inst.installments)}</div>
+            </div>
+            <div style="font-size:12.5px; font-weight:700; color:var(--text-soft); flex-shrink:0;">${fmt(perInst)}</div>
+          </div>
+          <div class="progress-track" style="margin-top:10px;"><div class="progress-fill" style="width:${pct}%; background:${done?'var(--pos)':COLORS[inst.color]};"></div></div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+            <div style="font-size:11px; color:var(--text-soft);">${done ? tr('inst_completed') : trf('inst_remaining', remainingCount, fmt(remainingAmount))}</div>
+            ${!done ? `<button onclick="payInstallment('${inst.id}')" style="border:none; background:var(--accent-color); color:var(--accent-color-ink); font-family:inherit; font-weight:800; font-size:11px; padding:7px 12px; border-radius:10px; cursor:pointer;">${tr('pay_this_month')}</button>` : ''}
+          </div>
+        </div>`;
+      }).join('')}
+      <div style="padding:14px 0;">
+        <button onclick="openInstSheet(null)" style="width:100%; border:1.5px dashed var(--border); background:none; border-radius:14px; padding:12px; font-family:inherit; font-weight:700; font-size:13px; color:var(--text-soft); cursor:pointer;">${tr('add_installment')}</button>
+      </div>
+    </div>
+    <div style="font-size:11px; color:var(--text-soft); padding:8px 4px 0;">${tr('installments_hint')}</div>
+  </div>
+
+  <div style="padding:20px 20px 4px;">
+    <div class="eyebrow" style="margin-bottom:10px;">${tr('appearance')}</div>
+    <div class="card" style="padding:16px 18px; display:flex; flex-direction:column; gap:16px;">
+      <div>
+        <div style="font-weight:700; font-size:13.5px; margin-bottom:10px;">${tr('style')}</div>
+        <div style="display:flex; gap:10px;">
+          <button onclick="setTheme('soft')" style="flex:1; border-radius:16px; padding:12px 10px; border:1.5px solid ${state.theme==='soft'?'var(--text)':'var(--border)'}; background:var(--card); cursor:pointer; font-family:inherit;">
+            <div style="display:flex; gap:4px; justify-content:center; margin-bottom:8px;">
+              <div style="width:14px;height:14px;border-radius:50%;background:#A8C8B8;"></div>
+              <div style="width:14px;height:14px;border-radius:50%;background:#C7DDE8;"></div>
+              <div style="width:14px;height:14px;border-radius:50%;background:#E8CFCB;"></div>
+            </div>
+            <div style="font-size:11.5px; font-weight:700; color:var(--text);">${tr('style_soft')}</div>
+          </button>
+          <button onclick="setTheme('playful')" style="flex:1; border-radius:16px; padding:12px 10px; border:1.5px solid ${state.theme==='playful'?'var(--text)':'var(--border)'}; background:var(--card); cursor:pointer; font-family:inherit;">
+            <div style="display:flex; gap:4px; justify-content:center; margin-bottom:8px;">
+              <div style="width:14px;height:14px;border-radius:50%;background:#33C481;"></div>
+              <div style="width:14px;height:14px;border-radius:50%;background:#4FA8FF;"></div>
+              <div style="width:14px;height:14px;border-radius:50%;background:#FF6F91;"></div>
+            </div>
+            <div style="font-size:11.5px; font-weight:700; color:var(--text);">${tr('style_playful')}</div>
+          </button>
+          <button onclick="setTheme('cute')" style="flex:1; border-radius:16px; padding:12px 10px; border:1.5px solid ${state.theme==='cute'?'var(--text)':'var(--border)'}; background:var(--card); cursor:pointer; font-family:inherit;">
+            <div style="display:flex; gap:4px; justify-content:center; margin-bottom:8px;">
+              <div style="width:14px;height:14px;border-radius:50%;background:#FF9EC4;"></div>
+              <div style="width:14px;height:14px;border-radius:50%;background:#A9E4F7;"></div>
+              <div style="width:14px;height:14px;border-radius:50%;background:#FFE29A;"></div>
+            </div>
+            <div style="font-size:11.5px; font-weight:700; color:var(--text);">${tr('style_cute')}</div>
+          </button>
+        </div>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div style="font-weight:700; font-size:13.5px;">${tr('dark_mode')}</div>
+        <button onclick="toggleDark()" style="width:46px; height:27px; border-radius:14px; border:1px solid var(--border); background:${state.dark?'var(--text)':'var(--border)'}; position:relative; cursor:pointer;">
+          <div style="width:21px; height:21px; border-radius:50%; background:var(--card); position:absolute; top:2px; left:${state.dark?'21px':'2px'}; transition:left .2s ease;"></div>
+        </button>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div style="font-weight:700; font-size:13.5px;">${tr('language')}</div>
+        <div class="segmented" style="width:auto; padding:3px;">
+          <button class="${state.lang==='en'?'active':''}" onclick="setLang('en')" style="padding:7px 16px;">EN</button>
+          <button class="${state.lang==='th'?'active':''}" onclick="setLang('th')" style="padding:7px 16px;">TH</button>
+        </div>
+      </div>
+      <div>
+        <div style="font-weight:700; font-size:13.5px; margin-bottom:10px;">${tr('accent_color')}</div>
+        <div style="display:flex; gap:12px; align-items:center;">
+          ${['primary','secondary','accent'].map(k=>`
+            <div class="swatch ${state.accentKey===k?'selected':''}" style="background:${COLORS[k]};" onclick="setAccent('${k}')"></div>`).join('')}
+          <div style="flex:1;"></div>
+          <button style="background:var(--accent-color); color:var(--accent-color-ink); border:none; border-radius:12px; padding:9px 16px; font-family:inherit; font-weight:800; font-size:12.5px;">${tr('preview')}</button>
+        </div>
+        <div style="font-size:11px; color:var(--text-soft); margin-top:10px; line-height:1.5;">${tr('accent_hint')}</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:20px 20px 4px;">
+    <div class="eyebrow" style="margin-bottom:10px;">${tr('export')}</div>
+    <div class="card" style="padding:6px 18px;">
+      <button onclick="exportCSV()" class="rowbtn">${iconEl('file-spreadsheet')}<span>${tr('export_csv')}</span>${iconEl('chevron-right')}</button>
+      <button onclick="exportJSON()" class="rowbtn">${iconEl('database-backup')}<span>${tr('backup_json')}</span>${iconEl('chevron-right')}</button>
+      <button onclick="triggerImport()" class="rowbtn">${iconEl('upload')}<span>${tr('import_json')}</span>${iconEl('chevron-right')}</button>
+    </div>
+    <div style="font-size:11px; color:var(--text-soft); padding:8px 4px 0;">${tr('import_hint')}</div>
+    <input type="file" id="importInput" accept="application/json,.json" style="display:none" onchange="handleImportFile(this)">
+  </div>
+
+  <div style="padding:20px 20px 4px;">
+    <div class="eyebrow" style="margin-bottom:10px; color:var(--neg);">${tr('danger_zone')}</div>
+    <div class="card" style="padding:6px 18px; border-color:var(--neg);">
+      <button onclick="clearAllData()" class="rowbtn danger">${iconEl('trash-2')}<span>${tr('clear_all_data')}</span></button>
+    </div>
+    <div style="font-size:11px; color:var(--text-soft); padding:8px 4px 0;">${tr('clear_all_hint')}</div>
+  </div>
+
+  <div style="padding:20px 20px 30px; text-align:center; color:var(--text-soft); font-size:11.5px;">
+    ${tr('footer_tag')}
+  </div>
+
+  <style>
+    .rowbtn{ width:100%; display:flex; align-items:center; gap:12px; padding:15px 4px; border:none; background:none; font-family:inherit; font-size:13.5px; font-weight:700; color:var(--text); cursor:pointer; border-bottom:1px solid var(--border); }
+    .rowbtn:last-child{ border-bottom:none; }
+    .rowbtn span{ flex:1; text-align:left; }
+    .rowbtn svg:first-child{ width:18px; height:18px; color:var(--text-soft); }
+    .rowbtn.danger{ color:var(--neg); }
+    .rowbtn.danger svg:first-child{ color:var(--neg); }
+    .rowbtn svg:last-child{ width:16px; height:16px; color:var(--text-soft); }
+  </style>
+  `;
+}
+
+window.editRecurring = (id)=>{
+  const r = state.recurring.find(x=>x.id===id);
+  if(!r) return;
+  const name = prompt('Name', r.name);
+  if(name===null) return;
+  const type = (prompt('Type: expense or income', r.type) || r.type).trim().toLowerCase()==='income' ? 'income' : 'expense';
+  const amount = parseFloat(prompt('Amount (THB)', r.amount)) || r.amount;
+  const freq = prompt('Frequency (e.g. Monthly, Every 2 weeks)', r.freq) || r.freq;
+  const schedule = prompt('When does it land? (e.g. "Day 25", "Government payroll cycle, varies", "Last business day")', r.schedule) || r.schedule;
+  r.name = name; r.type = type; r.amount = amount; r.freq = freq; r.schedule = schedule;
+  showToast(tr('toast_recurring_updated'),'check');
+  render();
+};
+window.addRecurring = ()=>{
+  const name = prompt('Name (e.g. Salary, Rent, Netflix)');
+  if(!name) return;
+  const type = (prompt('Type: expense or income','expense') || 'expense').trim().toLowerCase()==='income' ? 'income' : 'expense';
+  const amount = parseFloat(prompt('Amount (THB)','0')) || 0;
+  const freq = prompt('Frequency (e.g. Monthly, Every 2 weeks)','Monthly') || 'Monthly';
+  const schedule = prompt('When does it land? (e.g. "Day 25", "Government payroll cycle, varies")','Day 1') || 'Day 1';
+  const walletId = state.wallets[0]?.id;
+  const categoryId = state.categories.find(c=>c.type===type)?.id;
+  state.recurring.push({id:newId(), name, type, amount, freq, schedule, walletId, categoryId, icon: type==='income'?'banknote':'receipt'});
+  showToast(tr('toast_recurring_added'),'sparkles');
+  render();
+};
+window.deleteRecurringPrompt = (id)=>{
+  const r = state.recurring.find(x=>x.id===id);
+  if(!r) return;
+  if(confirm(`Remove "${r.name}" from recurring?`)){
+    state.recurring = state.recurring.filter(x=>x.id!==id);
+    showToast(tr('toast_removed'),'trash-2');
+    render();
+  }
+};
+window.toggleDark = ()=>{ state.dark = !state.dark; document.documentElement.classList.toggle('dark', state.dark); render(); };
+window.setTheme = (t)=>{
+  state.theme = t;
+  document.documentElement.classList.toggle('theme-playful', t==='playful');
+  document.documentElement.classList.toggle('theme-cute', t==='cute');
+  render();
+};
+window.setLang = (l)=>{ state.lang = l; document.documentElement.classList.toggle('lang-th', l==='th'); render(); };
+window.setAccent = (k)=>{ state.accentKey=k; document.documentElement.style.setProperty('--accent-color', COLORS[k]); document.documentElement.style.setProperty('--accent-color-ink', COLOR_INK[k]); render(); };
+window.moveWallet = (id,dir)=>{
+  const i = state.wallets.findIndex(w=>w.id===id);
+  const j = i+dir;
+  if(j<0 || j>=state.wallets.length) return;
+  [state.wallets[i], state.wallets[j]] = [state.wallets[j], state.wallets[i]];
+  render();
+};
+window.exportCSV = ()=>{
+  const rows = [['Date','Time','Type','Category','Wallet','To Wallet','Amount','Note']];
+  state.transactions.forEach(t=>{
+    const d = new Date(t.date);
+    rows.push([d.toLocaleDateString(), d.toLocaleTimeString(), t.type, catById(t.categoryId)?.name||'', walletById(t.walletId)?.name||'', walletById(t.toWalletId)?.name||'', t.amount, (t.note||'').replace(/,/g,';')]);
+  });
+  const csv = rows.map(r=>r.join(',')).join('\n');
+  downloadBlob(csv, 'daily-ledger.csv', 'text/csv');
+  showToast(tr('toast_csv_exported'),'file-check-2');
+};
+/* ---------------- BACKUP: shared build/apply + server sync ---------------- */
+function buildBackupObject(){
+  return {
+    version:1, exportedAt:new Date().toISOString(),
+    wallets:state.wallets, categories:state.categories, transactions:state.transactions,
+    budgets:state.budgets, recurring:state.recurring, goal:state.goal,
+    quickItems:state.quickItems, installments:state.installments,
+    accentKey:state.accentKey, dark:state.dark, lang:state.lang, theme:state.theme,
+  };
+}
+function applyBackup(data){
+  if(!data || !Array.isArray(data.wallets) || !Array.isArray(data.transactions) || !Array.isArray(data.categories)) return false;
+  state.wallets = data.wallets;
+  state.categories = data.categories;
+  state.transactions = data.transactions;
+  if(Array.isArray(data.budgets)) state.budgets = data.budgets;
+  if(Array.isArray(data.recurring)) state.recurring = data.recurring;
+  if(data.goal !== undefined) state.goal = data.goal;
+  if(Array.isArray(data.quickItems)) state.quickItems = data.quickItems;
+  if(Array.isArray(data.installments)) state.installments = data.installments;
+  if(data.accentKey){ setAccent(data.accentKey); }
+  if(typeof data.dark==='boolean'){ state.dark = data.dark; document.documentElement.classList.toggle('dark', state.dark); }
+  if(data.lang){ state.lang = data.lang; document.documentElement.classList.toggle('lang-th', state.lang==='th'); }
+  if(data.theme){
+    state.theme = data.theme;
+    document.documentElement.classList.toggle('theme-playful', state.theme==='playful');
+    document.documentElement.classList.toggle('theme-cute', state.theme==='cute');
+  }
+  return true;
+}
+
+// Firebase sync — data is stored per-account in Firestore at users/{uid},
+// so it follows you across devices once signed in. Autosaves ~0.9s after
+// any change; loads automatically right after sign-in.
+let _saveTimer = null;
+function scheduleServerSave(){
+  if(!state.user || state._loading) return;
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(saveToServer, 900);
+}
+function saveToServer(){
+  if(!state.user) return;
+  fbDb.collection('users').doc(state.user.uid).set({
+    json: JSON.stringify(buildBackupObject()),
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+  }).catch(err=> console.error('save failed', err));
+}
+function loadFromServer(){
+  if(!state.user) return;
+  const uidAtRequest = state.user.uid;
+  state._loading = true;
+  fbDb.collection('users').doc(uidAtRequest).get().then(doc=>{
+    if(state.user?.uid !== uidAtRequest) return; // user switched again while this was in flight
+    if(doc.exists && doc.data().json){
+      const data = JSON.parse(doc.data().json);
+      if(applyBackup(data)){
+        render();
+        showToast(tr('toast_server_loaded'),'database-backup');
+      }
+    }
+  }).catch(err=> console.error('load failed', err))
+    .finally(()=>{ if(state.user?.uid === uidAtRequest) state._loading = false; });
+}
+
+window.exportJSON = ()=>{
+  downloadBlob(JSON.stringify(buildBackupObject(),null,2), 'daily-ledger-backup.json', 'application/json');
+  showToast(tr('toast_backup_saved'),'database-backup');
+};
+
+window.triggerImport = ()=>{ document.getElementById('importInput').click(); };
+
+window.clearAllData = ()=>{
+  if(!confirm(tr('confirm_clear_all'))) return;
+  if(!confirm(tr('confirm_clear_all_2'))) return;
+  resetToBlankData();
+  scheduleServerSave();
+  render();
+  showToast(tr('toast_data_cleared'),'trash-2');
+};
+window.handleImportFile = (input)=>{
+  const file = input.files && input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (e)=>{
+    let data;
+    try{ data = JSON.parse(e.target.result); }
+    catch(err){ showToast(tr('err_import_invalid'),'circle-alert'); input.value=''; return; }
+
+    if(!(Array.isArray(data.wallets) && Array.isArray(data.transactions) && Array.isArray(data.categories))){
+      showToast(tr('err_import_invalid'),'circle-alert'); input.value=''; return;
+    }
+    if(!confirm(tr('confirm_import'))){ input.value=''; return; }
+
+    applyBackup(data);
+    input.value = '';
+    showToast(tr('toast_import_success'),'check');
+    render();
+  };
+  reader.onerror = ()=>{ showToast(tr('err_import_invalid'),'circle-alert'); };
+  reader.readAsText(file);
+};
+function downloadBlob(content, filename, type){
+  const blob = new Blob([content], {type});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download=filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* ---------------- WALLET DETAIL PAGE ---------------- */
+const WALLET_TYPES = ['Cash','Bank','Savings','Credit Card','Investment','E-Wallet','Travel Fund','Custom'];
+
+window.openWalletPage = (id)=>{
+  if(id){
+    const w = walletById(id);
+    if(!w) return;
+    state.walletPageId = id;
+    state.walletPageEditing = false;
+    state.walletEdit = { ...w };
+  } else {
+    state.walletPageId = null;
+    state.walletPageEditing = true;
+    state.walletEdit = { name:'', type:'Custom', icon:ICONS[0], color:'primary', initial:0, desc:'' };
+  }
+  renderWalletPage();
+  document.getElementById('walletPage').classList.add('open');
+};
+window.closeWalletPage = ()=>{
+  document.getElementById('walletPage').classList.remove('open');
+};
+window.walletPageCancelEdit = ()=>{
+  if(state.walletPageId===null){ closeWalletPage(); return; }
+  const w = walletById(state.walletPageId);
+  state.walletEdit = { ...w };
+  state.walletPageEditing = false;
+  renderWalletPage();
+};
+window.walletPageStartEdit = ()=>{ state.walletPageEditing = true; renderWalletPage(); };
+window.selectWalletEditIcon = (name)=>{ state.walletEdit.icon = name; renderWalletPage(); };
+window.selectWalletEditColor = (key)=>{ state.walletEdit.color = key; renderWalletPage(); };
+
+window.saveWalletPageEdit = ()=>{
+  const name = (document.getElementById('weName')?.value || '').trim();
+  if(!name){ showToast(tr('err_name'),'circle-alert'); return; }
+  const type = document.getElementById('weType')?.value || 'Custom';
+  const initial = parseFloat(document.getElementById('weInitial')?.value) || 0;
+  const desc = document.getElementById('weDesc')?.value || '';
+  state.walletEdit.name = name; state.walletEdit.type = type; state.walletEdit.initial = initial; state.walletEdit.desc = desc;
+
+  if(state.walletPageId===null){
+    const w = { id:newId(), ...state.walletEdit };
+    state.wallets.push(w);
+    state.walletPageId = w.id;
+    showToast(tr('toast_wallet_created'),'sparkles');
+  } else {
+    const w = walletById(state.walletPageId);
+    Object.assign(w, state.walletEdit);
+    showToast(tr('toast_wallet_updated'),'check');
+  }
+  state.walletPageEditing = false;
+  renderWalletPage();
+  render();
+};
+
+window.deleteWalletFromPage = (id)=>{
+  if(state.wallets.length<=1){ showToast(tr('err_keep_wallet'),'circle-alert'); return; }
+  if(!confirm('Remove this wallet? Its past entries will stay in your timeline.')) return;
+  state.wallets = state.wallets.filter(w=>w.id!==id);
+  showToast(tr('toast_wallet_removed'),'trash-2');
+  closeWalletPage();
+  render();
+};
+
+function renderWalletPage(){
+  const el = document.getElementById('walletPage');
+  const creating = state.walletPageId===null;
+  const w = creating ? null : walletById(state.walletPageId);
+  if(!creating && !w){ el.innerHTML=''; return; }
+  const editing = state.walletPageEditing;
+  const ed = state.walletEdit;
+
+  if(editing){
+    el.innerHTML = `
+      <div class="page-head">
+        <div class="back-btn" onclick="walletPageCancelEdit()">${iconEl('arrow-left')}</div>
+        <div class="serif" style="font-size:17px; font-weight:600;">${creating ? tr('new_wallet') : tr('edit_wallet')}</div>
+      </div>
+      <div style="padding:0 20px;">
+        <div class="card" style="padding:2px 16px;">
+          <div class="field-row">
+            ${iconEl('pen-line')}
+            <input id="weName" placeholder="${tr('wallet_name_ph')}" value="${(ed.name||'').replace(/"/g,'&quot;')}" maxlength="24">
+          </div>
+          <div class="field-row">
+            ${iconEl('wallet')}
+            <select id="weType">
+              ${WALLET_TYPES.map(t=>`<option value="${t}" ${ed.type===t?'selected':''}>${t}</option>`).join('')}
+            </select>
+          </div>
+          <div class="field-row">
+            ${iconEl('banknote')}
+            <input id="weInitial" type="number" placeholder="${tr('starting_balance')}" value="${ed.initial}">
+          </div>
+          <div class="field-row">
+            ${iconEl('notebook-pen')}
+            <input id="weDesc" placeholder="${tr('desc_optional')}" value="${(ed.desc||'').replace(/"/g,'&quot;')}" maxlength="60">
+          </div>
+        </div>
+
+        <div class="eyebrow" style="margin:18px 4px 8px;">${tr('icon')}</div>
+        <div class="pill-grid">
+          ${ICONS.map(name=>`
+            <div class="pill ${ed.icon===name?'selected':''}" onclick="selectWalletEditIcon('${name}')">
+              <div class="icon-chip" style="background:${mixAlpha(COLORS[ed.color], '55')}; color:${COLOR_INK[ed.color]};">${iconEl(name)}</div>
+            </div>`).join('')}
+        </div>
+
+        <div class="eyebrow" style="margin:18px 4px 8px;">${tr('color')}</div>
+        <div style="display:flex; gap:14px; padding:0 4px;">
+          ${['primary','secondary','accent'].map(k=>`
+            <div class="swatch ${ed.color===k?'selected':''}" style="background:${COLORS[k]};" onclick="selectWalletEditColor('${k}')"></div>`).join('')}
+        </div>
+
+        <button class="save-btn" onclick="saveWalletPageEdit()">${creating ? tr('create_wallet') : tr('save_changes')}</button>
+        ${!creating ? `<button onclick="deleteWalletFromPage('${w.id}')" style="width:100%; border:none; background:none; color:var(--neg); font-family:inherit; font-weight:700; font-size:13px; padding:16px; cursor:pointer;">${tr('delete_wallet')}</button>` : ''}
+      </div>
+    `;
+    return;
+  }
+
+  const bal = walletBalance(w.id);
+  const txns = state.transactions.filter(t=> t.walletId===w.id || t.toWalletId===w.id).sort((a,b)=> new Date(b.date)-new Date(a.date));
+
+  el.innerHTML = `
+    <div class="page-head">
+      <div class="back-btn" onclick="closeWalletPage()">${iconEl('arrow-left')}</div>
+      <div class="serif" style="font-size:17px; font-weight:600; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${w.name}</div>
+      <div class="back-btn" onclick="walletPageStartEdit()">${iconEl('pen-line')}</div>
+    </div>
+
+    <div style="padding:0 20px;">
+      <div style="border-radius:24px; padding:26px; background:linear-gradient(135deg, ${COLORS[w.color]}, ${mixAlpha(COLORS[w.color], 'CC')}); position:relative; overflow:hidden;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+          <div class="wicon" style="width:40px;height:40px;">${iconEl(w.icon)}</div>
+          <span style="font-size:10.5px; font-weight:800; letter-spacing:.04em; text-transform:uppercase; opacity:.7;">${w.type}</span>
+        </div>
+        <div style="margin-top:22px;">
+          <div style="font-size:12.5px; font-weight:700; opacity:.8;">${tr('balance')}</div>
+          <div class="serif" style="font-size:clamp(24px,9vw,36px); font-weight:600; word-break:break-word;">${fmt(bal)}</div>
+        </div>
+        ${w.desc ? `<div style="margin-top:12px; font-size:12.5px; opacity:.85; line-height:1.4;">${w.desc}</div>` : ''}
+      </div>
+    </div>
+
+    <div style="padding:22px 20px 4px;">
+      <div class="eyebrow" style="margin-bottom:10px;">${tr('history')}</div>
+      ${txns.length ? `<div class="card" style="padding:2px 16px;">${txns.map(renderTlRow).join('')}</div>`
+        : `<div style="padding:24px 4px; text-align:center; color:var(--text-soft); font-size:13px;">${tr('no_wallet_entries')}</div>`}
+    </div>
+  `;
+}
+
+/* ---------------- ADD SHEET ---------------- */
+function openAddSheet(type){
+  state.addType = type || 'expense';
+  state.addSelectedCategory = state.categories.find(c=>c.type===state.addType)?.id || null;
+  state.addSelectedWallet = state.wallets[0]?.id;
+  state.addSelectedToWallet = state.wallets[1]?.id || state.wallets[0]?.id;
+  state.addAmount = '';
+  state.addNote = '';
+  state.addDate = new Date().toISOString().slice(0,10);
+  state.addPhoto = null;
+  state.addOpen = true;
+  renderSheet();
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('addSheet').classList.add('open');
+}
+function closeAddSheet(){
+  state.addOpen = false;
+  document.getElementById('overlay').classList.remove('open');
+  document.getElementById('addSheet').classList.remove('open');
+}
+window.setAddType = (t)=>{ state.addType=t; state.addSelectedCategory = state.categories.find(c=>c.type===t)?.id || null; renderSheet(); };
+window.selectCategory = (id)=>{ state.addSelectedCategory=id; renderSheet(); };
+window.selectWallet = (id)=>{ state.addSelectedWallet=id; renderSheet(); };
+window.selectToWallet = (id)=>{ state.addSelectedToWallet=id; renderSheet(); };
+window.handlePhotoSelect = (input)=>{
+  const file = input.files && input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (e)=>{ state.addPhoto = e.target.result; renderSheet(); };
+  reader.readAsDataURL(file);
+};
+window.removeAddPhoto = ()=>{ state.addPhoto = null; renderSheet(); };
+
+function renderSheet(){
+  const t = state.addType;
+  const cats = state.categories.filter(c=>c.type===t);
+  document.getElementById('addSheet').innerHTML = `
+    <div class="sheet-handle"></div>
+    <div class="segmented">
+      <button class="${t==='expense'?'active':''}" onclick="setAddType('expense')">${tr('tab_expense')}</button>
+      <button class="${t==='income'?'active':''}" onclick="setAddType('income')">${tr('tab_income')}</button>
+      <button class="${t==='transfer'?'active':''}" onclick="setAddType('transfer')">${tr('tab_transfer')}</button>
+    </div>
+
+    <div style="margin-top:6px;">
+      <input class="amount-input" id="amountInput" type="number" inputmode="decimal" placeholder="฿0" min="0" step="0.01"
+        value="${state.addAmount}" oninput="state.addAmount=this.value">
+    </div>
+
+    ${t!=='transfer' ? `
+      <div class="eyebrow" style="margin:6px 4px 8px;">${tr('category')}</div>
+      <div class="pill-grid" style="margin-bottom:10px;">
+        ${cats.map(c=>`
+          <div class="pill ${state.addSelectedCategory===c.id?'selected':''}" onclick="selectCategory('${c.id}')">
+            <div class="icon-chip" style="background:${mixAlpha(COLORS[c.color], '55')}; color:${COLOR_INK[c.color]};">${iconEl(c.icon)}</div>
+            <span>${c.name}</span>
+          </div>`).join('')}
+      </div>
+    ` : ''}
+
+    <div class="card" style="padding:2px 16px; margin-top:6px;">
+      ${t==='transfer' ? `
+        <div class="field-row">
+          ${iconEl('arrow-up-right')}
+          <select id="fromWalletSel" onchange="selectWallet(this.value)">
+            ${state.wallets.map(w=>`<option value="${w.id}" ${state.addSelectedWallet===w.id?'selected':''}>${w.name}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field-row">
+          ${iconEl('arrow-down-left')}
+          <select id="toWalletSel" onchange="selectToWallet(this.value)">
+            ${state.wallets.map(w=>`<option value="${w.id}" ${state.addSelectedToWallet===w.id?'selected':''}>${w.name}</option>`).join('')}
+          </select>
+        </div>
+      ` : `
+        <div class="field-row">
+          ${iconEl('wallet')}
+          <select id="walletSel" onchange="selectWallet(this.value)">
+            ${state.wallets.map(w=>`<option value="${w.id}" ${state.addSelectedWallet===w.id?'selected':''}>${w.name}</option>`).join('')}
+          </select>
+        </div>
+      `}
+      <div class="field-row">
+        ${iconEl('calendar')}
+        <input id="dateInput" type="date" value="${state.addDate}" oninput="state.addDate=this.value">
+      </div>
+      <div class="field-row">
+        ${iconEl('pen-line')}
+        <input id="noteInput" placeholder="${tr('add_note')}" maxlength="60" value="${state.addNote.replace(/"/g,'&quot;')}" oninput="state.addNote=this.value">
+      </div>
+    </div>
+
+    ${t!=='transfer' ? `
+      <div style="margin-top:14px;">
+        ${state.addPhoto ? `
+          <div class="photo-preview-wrap">
+            <img src="${state.addPhoto}" style="width:84px; height:84px; border-radius:16px; object-fit:cover; display:block;">
+            <div class="photo-remove" onclick="removeAddPhoto()">${iconEl('x')}</div>
+          </div>
+        ` : `
+          <label class="attach-btn" for="photoInput">
+            ${iconEl('camera')}
+            ${tr('attach_photo')}
+          </label>
+        `}
+        <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none" onchange="handlePhotoSelect(this)">
+      </div>
+    ` : ''}
+
+    <button class="save-btn" onclick="saveTransaction()">${tr('save_entry')}</button>
+  `;
+}
+
+window.saveTransaction = ()=>{
+  const amountRaw = parseFloat(state.addAmount);
+  if(!amountRaw || amountRaw<=0){ showToast(tr('err_amount'),'circle-alert'); return; }
+  const dateVal = state.addDate;
+  const note = state.addNote;
+  const now = new Date();
+  const d = dateVal ? new Date(dateVal) : now;
+  d.setHours(now.getHours(), now.getMinutes());
+
+  if(state.addType==='transfer'){
+    if(state.addSelectedWallet===state.addSelectedToWallet){ showToast(tr('err_two_wallets'),'circle-alert'); return; }
+    state.transactions.push({id:newId(), type:'transfer', categoryId:'', walletId:state.addSelectedWallet, toWalletId:state.addSelectedToWallet, amount:amountRaw, note, date:d.toISOString(), photo:null});
+    showToast(tr('toast_transfer_recorded'),'send');
+  } else {
+    if(!state.addSelectedCategory){ showToast(tr('err_category'),'circle-alert'); return; }
+    state.transactions.push({id:newId(), type:state.addType, categoryId:state.addSelectedCategory, walletId:state.addSelectedWallet, toWalletId:null, amount:amountRaw, note, date:d.toISOString(), photo:state.addPhoto});
+    showToast(state.addType==='income' ? tr('toast_income_added') : tr('toast_expense_added'), 'check');
+  }
+  closeAddSheet();
+  render();
+};
+
+/* ---------------- QUICK LOG ---------------- */
+window.quickLogItem = (id)=>{
+  const q = state.quickItems.find(x=>x.id===id);
+  if(!q) return;
+  const tx = {id:newId(), type:q.type, categoryId:q.categoryId, walletId:q.walletId, toWalletId:null, amount:q.amount, note:q.name, date:new Date().toISOString(), photo:null};
+  state.transactions.push(tx);
+  state.lastQuickTxId = tx.id;
+  showToast(trf('toast_logged', q.name), 'zap', {label:tr('toast_undo'), onclick:'undoLastQuickLog()'});
+  render();
+};
+window.undoLastQuickLog = ()=>{
+  if(!state.lastQuickTxId) return;
+  state.transactions = state.transactions.filter(t=>t.id!==state.lastQuickTxId);
+  state.lastQuickTxId = null;
+  document.getElementById('toast').classList.remove('show');
+  showToast(tr('toast_removed'),'trash-2');
+  render();
+};
+
+window.openQiSheet = (id)=>{
+  if(id){
+    const q = state.quickItems.find(x=>x.id===id);
+    if(!q) return;
+    state.qiEditingId = id;
+    state.qiForm = { ...q };
+  } else {
+    state.qiEditingId = null;
+    state.qiForm = { name:'', amount:'', type:'expense', categoryId: state.categories.find(c=>c.type==='expense')?.id, walletId: state.wallets[0]?.id, icon:'sparkles' };
+  }
+  renderQiSheet();
+  document.getElementById('qiOverlay').classList.add('open');
+  document.getElementById('qiSheet').classList.add('open');
+};
+window.closeQiSheet = ()=>{
+  document.getElementById('qiOverlay').classList.remove('open');
+  document.getElementById('qiSheet').classList.remove('open');
+};
+window.qiSetType = (t)=>{ state.qiForm.type = t; state.qiForm.categoryId = state.categories.find(c=>c.type===t)?.id; renderQiSheet(); };
+window.qiSelectCategory = (id)=>{ state.qiForm.categoryId = id; const c = catById(id); if(c) state.qiForm.icon = c.icon; renderQiSheet(); };
+window.qiSelectWallet = (id)=>{ state.qiForm.walletId = id; renderQiSheet(); };
+
+window.saveQiItem = ()=>{
+  const name = (document.getElementById('qiName')?.value || '').trim();
+  const amount = parseFloat(document.getElementById('qiAmount')?.value);
+  if(!name){ showToast(tr('err_name'),'circle-alert'); return; }
+  if(!amount || amount<=0){ showToast(tr('err_amount'),'circle-alert'); return; }
+  state.qiForm.name = name; state.qiForm.amount = amount;
+  if(state.qiEditingId){
+    const q = state.quickItems.find(x=>x.id===state.qiEditingId);
+    Object.assign(q, state.qiForm);
+    showToast(tr('toast_qty_updated'),'check');
+  } else {
+    state.quickItems.push({ id:newId(), ...state.qiForm });
+    showToast(tr('toast_qty_added'),'sparkles');
+  }
+  closeQiSheet();
+  render();
+};
+window.deleteQiItem = (id)=>{
+  state.quickItems = state.quickItems.filter(x=>x.id!==id);
+  closeQiSheet();
+  showToast(tr('toast_removed'),'trash-2');
+  render();
+};
+
+function renderQiSheet(){
+  const f = state.qiForm;
+  const cats = state.categories.filter(c=>c.type===f.type);
+  document.getElementById('qiSheet').innerHTML = `
+    <div class="sheet-handle"></div>
+    <div class="eyebrow" style="margin-bottom:10px;">${state.qiEditingId ? tr('edit_quick_item') : tr('new_quick_item')}</div>
+    <div class="segmented">
+      <button class="${f.type==='expense'?'active':''}" onclick="qiSetType('expense')">${tr('tab_expense')}</button>
+      <button class="${f.type==='income'?'active':''}" onclick="qiSetType('income')">${tr('tab_income')}</button>
+    </div>
+
+    <div class="card" style="padding:2px 16px; margin-top:14px;">
+      <div class="field-row">
+        ${iconEl('pen-line')}
+        <input id="qiName" placeholder="${tr('qi_name_ph')}" value="${(f.name||'').replace(/"/g,'&quot;')}" maxlength="24">
+      </div>
+      <div class="field-row">
+        ${iconEl('banknote')}
+        <input id="qiAmount" type="number" placeholder="${tr('qi_amount_ph')}" value="${f.amount||''}" min="0" step="0.01">
+      </div>
+      <div class="field-row">
+        ${iconEl('wallet')}
+        <select onchange="qiSelectWallet(this.value)">
+          ${state.wallets.map(w=>`<option value="${w.id}" ${f.walletId===w.id?'selected':''}>${w.name}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+
+    <div class="eyebrow" style="margin:16px 4px 8px;">${tr('category')}</div>
+    <div class="pill-grid" style="margin-bottom:6px;">
+      ${cats.map(c=>`
+        <div class="pill ${f.categoryId===c.id?'selected':''}" onclick="qiSelectCategory('${c.id}')">
+          <div class="icon-chip" style="background:${mixAlpha(COLORS[c.color], '55')}; color:${COLOR_INK[c.color]};">${iconEl(c.icon)}</div>
+          <span>${c.name}</span>
+        </div>`).join('')}
+    </div>
+
+    <button class="save-btn" onclick="saveQiItem()">${state.qiEditingId ? tr('save_changes') : tr('add_quick_item_btn')}</button>
+    ${state.qiEditingId ? `<button onclick="deleteQiItem('${state.qiEditingId}')" style="width:100%; border:none; background:none; color:var(--neg); font-family:inherit; font-weight:700; font-size:13px; padding:14px; cursor:pointer;">${tr('remove')}</button>` : ''}
+  `;
+}
+
+/* ---------------- INSTALLMENTS ---------------- */
+window.openInstSheet = (id)=>{
+  if(id){
+    const inst = state.installments.find(x=>x.id===id);
+    if(!inst) return;
+    state.instEditingId = id;
+    state.instForm = { ...inst };
+  } else {
+    state.instEditingId = null;
+    state.instForm = { name:'', icon:'credit-card', color:'secondary', totalAmount:'', installments:'', paid:0,
+      categoryId: state.categories.find(c=>c.type==='expense')?.id, walletId: state.wallets[0]?.id };
+  }
+  renderInstSheet();
+  document.getElementById('instOverlay').classList.add('open');
+  document.getElementById('instSheet').classList.add('open');
+};
+window.closeInstSheet = ()=>{
+  document.getElementById('instOverlay').classList.remove('open');
+  document.getElementById('instSheet').classList.remove('open');
+};
+window.instSelectCategory = (id)=>{ state.instForm.categoryId = id; renderInstSheet(); };
+window.instSelectWallet = (id)=>{ state.instForm.walletId = id; renderInstSheet(); };
+window.instSelectIcon = (name)=>{ state.instForm.icon = name; renderInstSheet(); };
+window.instSelectColor = (k)=>{ state.instForm.color = k; renderInstSheet(); };
+
+window.saveInstItem = ()=>{
+  const name = (document.getElementById('instName')?.value || '').trim();
+  const totalAmount = parseFloat(document.getElementById('instTotal')?.value);
+  const installments = parseInt(document.getElementById('instCount')?.value);
+  const paid = parseInt(document.getElementById('instPaid')?.value) || 0;
+  if(!name){ showToast(tr('err_name'),'circle-alert'); return; }
+  if(!totalAmount || totalAmount<=0){ showToast(tr('err_amount'),'circle-alert'); return; }
+  if(!installments || installments<=0){ showToast(tr('err_installments_count'),'circle-alert'); return; }
+  state.instForm.name = name; state.instForm.totalAmount = totalAmount;
+  state.instForm.installments = installments; state.instForm.paid = Math.min(paid, installments);
+
+  if(state.instEditingId){
+    const inst = state.installments.find(x=>x.id===state.instEditingId);
+    Object.assign(inst, state.instForm);
+    showToast(tr('toast_inst_saved'),'check');
+  } else {
+    state.installments.push({ id:newId(), ...state.instForm });
+    showToast(tr('toast_inst_added'),'sparkles');
+  }
+  closeInstSheet();
+  render();
+};
+window.deleteInstItem = (id)=>{
+  state.installments = state.installments.filter(x=>x.id!==id);
+  closeInstSheet();
+  showToast(tr('toast_removed'),'trash-2');
+  render();
+};
+
+window.payInstallment = (id)=>{
+  const inst = state.installments.find(x=>x.id===id);
+  if(!inst || inst.paid>=inst.installments) return;
+  const perInst = Math.round(inst.totalAmount / inst.installments);
+  const tx = {id:newId(), type:'expense', categoryId:inst.categoryId, walletId:inst.walletId, toWalletId:null, amount:perInst, note:inst.name, date:new Date().toISOString(), photo:null};
+  state.transactions.push(tx);
+  inst.paid += 1;
+  state.lastInstPayment = { instId:id, txId:tx.id };
+  showToast(trf('toast_logged', inst.name), 'zap', {label:tr('toast_undo'), onclick:'undoInstPayment()'});
+  render();
+};
+window.undoInstPayment = ()=>{
+  if(!state.lastInstPayment) return;
+  const { instId, txId } = state.lastInstPayment;
+  state.transactions = state.transactions.filter(t=>t.id!==txId);
+  const inst = state.installments.find(x=>x.id===instId);
+  if(inst) inst.paid = Math.max(0, inst.paid-1);
+  state.lastInstPayment = null;
+  document.getElementById('toast').classList.remove('show');
+  showToast(tr('toast_removed'),'trash-2');
+  render();
+};
+
+function renderInstSheet(){
+  const f = state.instForm;
+  const cats = state.categories.filter(c=>c.type==='expense');
+  const perInst = (f.totalAmount && f.installments) ? Math.round(f.totalAmount / f.installments) : 0;
+  document.getElementById('instSheet').innerHTML = `
+    <div class="sheet-handle"></div>
+    <div class="eyebrow" style="margin-bottom:10px;">${state.instEditingId ? tr('edit_installment') : tr('new_installment')}</div>
+
+    <div class="card" style="padding:2px 16px;">
+      <div class="field-row">
+        ${iconEl('pen-line')}
+        <input id="instName" placeholder="${tr('inst_name_ph')}" value="${(f.name||'').replace(/"/g,'&quot;')}" maxlength="30">
+      </div>
+      <div class="field-row">
+        ${iconEl('banknote')}
+        <input id="instTotal" type="number" placeholder="${tr('total_amount')}" value="${f.totalAmount||''}" min="0" step="0.01" oninput="renderInstSheet_livePreview()">
+      </div>
+      <div class="field-row">
+        ${iconEl('receipt')}
+        <input id="instCount" type="number" placeholder="${tr('num_installments')}" value="${f.installments||''}" min="1" step="1" oninput="renderInstSheet_livePreview()">
+      </div>
+      <div class="field-row">
+        ${iconEl('check')}
+        <input id="instPaid" type="number" placeholder="${tr('paid_so_far')}" value="${f.paid||0}" min="0" step="1">
+      </div>
+      <div class="field-row">
+        ${iconEl('wallet')}
+        <select onchange="instSelectWallet(this.value)">
+          ${state.wallets.map(w=>`<option value="${w.id}" ${f.walletId===w.id?'selected':''}>${w.name}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div id="instPreview" style="font-size:11px; color:var(--text-soft); padding:8px 4px 0;">${perInst ? trf('per_installment', fmt(perInst)) : ''}</div>
+
+    <div class="eyebrow" style="margin:16px 4px 8px;">${tr('category')}</div>
+    <div class="pill-grid" style="margin-bottom:6px;">
+      ${cats.map(c=>`
+        <div class="pill ${f.categoryId===c.id?'selected':''}" onclick="instSelectCategory('${c.id}')">
+          <div class="icon-chip" style="background:${mixAlpha(COLORS[c.color], '55')}; color:${COLOR_INK[c.color]};">${iconEl(c.icon)}</div>
+          <span>${c.name}</span>
+        </div>`).join('')}
+    </div>
+
+    <div class="eyebrow" style="margin:16px 4px 8px;">${tr('icon')}</div>
+    <div class="pill-grid" style="margin-bottom:6px;">
+      ${ICONS.map(name=>`
+        <div class="pill ${f.icon===name?'selected':''}" onclick="instSelectIcon('${name}')">
+          <div class="icon-chip" style="background:${mixAlpha(COLORS[f.color], '55')}; color:${COLOR_INK[f.color]};">${iconEl(name)}</div>
+        </div>`).join('')}
+    </div>
+
+    <div class="eyebrow" style="margin:16px 4px 8px;">${tr('color')}</div>
+    <div style="display:flex; gap:14px; padding:0 4px;">
+      ${['primary','secondary','accent'].map(k=>`
+        <div class="swatch ${f.color===k?'selected':''}" style="background:${COLORS[k]};" onclick="instSelectColor('${k}')"></div>`).join('')}
+    </div>
+
+    <button class="save-btn" onclick="saveInstItem()">${state.instEditingId ? tr('save_changes') : tr('add_installment')}</button>
+    ${state.instEditingId ? `<button onclick="deleteInstItem('${state.instEditingId}')" style="width:100%; border:none; background:none; color:var(--neg); font-family:inherit; font-weight:700; font-size:13px; padding:14px; cursor:pointer;">${tr('remove')}</button>` : ''}
+  `;
+}
+window.renderInstSheet_livePreview = ()=>{
+  const total = parseFloat(document.getElementById('instTotal')?.value);
+  const count = parseInt(document.getElementById('instCount')?.value);
+  const el = document.getElementById('instPreview');
+  if(el) el.textContent = (total && count) ? trf('per_installment', fmt(Math.round(total/count))) : '';
+};
+
+/* ---------------- NAV / ROOT RENDER ---------------- */
+function switchTab(tab){ state.tab = tab; render(); window.scrollTo(0,0); }
+window.switchTab = switchTab;
+
+function render(){
+  document.querySelectorAll('.navbtn').forEach(b=> b.classList.toggle('active', b.dataset.tab===state.tab));
+  document.getElementById('navlbl-home').textContent = tr('nav_home');
+  document.getElementById('navlbl-timeline').textContent = tr('nav_timeline');
+  document.getElementById('navlbl-budget').textContent = tr('nav_budget');
+  document.getElementById('navlbl-profile').textContent = tr('nav_profile');
+  const map = { home:renderHome, timeline:renderTimeline, budget:renderBudget, profile:renderProfile };
+  document.getElementById('content').innerHTML = map[state.tab]();
+  const s = document.getElementById('tlSearch');
+  if(s) s.addEventListener('input', (e)=>{ state.timelineFilter.q = e.target.value; renderTimelineListOnly(); });
+  scheduleServerSave();
+}
+function renderTimelineListOnly(){
+  // lightweight re-render that preserves focus in search box
+  const active = document.activeElement;
+  const wasSearch = active && active.id==='tlSearch';
+  const caret = wasSearch ? active.selectionStart : null;
+  document.getElementById('content').innerHTML = renderTimeline();
+  const s = document.getElementById('tlSearch');
+  if(s){
+    s.addEventListener('input', (e)=>{ state.timelineFilter.q = e.target.value; renderTimelineListOnly(); });
+    if(wasSearch){ s.focus(); s.setSelectionRange(caret, caret); }
+  }
+}
+
+document.querySelectorAll('.navbtn').forEach(b=> b.addEventListener('click', ()=> switchTab(b.dataset.tab)));
+document.getElementById('fabBtn').addEventListener('click', ()=> openAddSheet('expense'));
+document.getElementById('overlay').addEventListener('click', closeAddSheet);
+document.getElementById('qiOverlay').addEventListener('click', closeQiSheet);
+document.getElementById('instOverlay').addEventListener('click', closeInstSheet);
+
+/* ---------------- AUTH ---------------- */
+function authErrorMessage(code){
+  switch(code){
+    case 'auth/invalid-email': return tr('err_auth_invalid_email');
+    case 'auth/weak-password': return tr('err_auth_weak_password');
+    case 'auth/wrong-password':
+    case 'auth/invalid-credential':
+    case 'auth/user-not-found': return tr('err_auth_wrong_password');
+    case 'auth/email-already-in-use': return tr('err_auth_email_in_use');
+    default: return tr('err_auth_generic');
+  }
+}
+window.setAuthMode = (m)=>{ state.authMode = m; state.authError=''; renderAuthScreen(); };
+window.doAuth = ()=>{
+  const email = (document.getElementById('authEmail')?.value || '').trim();
+  const pass = document.getElementById('authPassword')?.value || '';
+  if(!email || !pass){ state.authError = tr('err_auth_fill'); renderAuthScreen(); return; }
+  state.authBusy = true; state.authError = ''; renderAuthScreen();
+  const action = state.authMode==='signup'
+    ? fbAuth.createUserWithEmailAndPassword(email, pass)
+    : fbAuth.signInWithEmailAndPassword(email, pass);
+  action.catch(err=>{
+    state.authBusy = false;
+    state.authError = authErrorMessage(err.code);
+    renderAuthScreen();
+  });
+};
+window.doSignOut = ()=>{ fbAuth.signOut(); };
+
+function renderAuthScreen(){
+  const el = document.getElementById('authScreen');
+  const su = state.authMode==='signup';
+  el.innerHTML = `
+    <div style="text-align:center; margin-bottom:28px;">
+      <div class="serif" style="font-size:28px; font-weight:600;">Daily Ledger</div>
+      <div style="font-size:12.5px; color:var(--text-soft); margin-top:4px;">${tr('app_tagline')}</div>
+    </div>
+    <div class="segmented" style="margin-bottom:18px;">
+      <button class="${!su?'active':''}" onclick="setAuthMode('signin')">${tr('sign_in')}</button>
+      <button class="${su?'active':''}" onclick="setAuthMode('signup')">${tr('sign_up')}</button>
+    </div>
+    <div class="auth-error ${state.authError?'show':''}">${state.authError||''}</div>
+    <div class="auth-field">
+      ${iconEl('pen-line')}
+      <input id="authEmail" type="email" placeholder="${tr('email')}" autocomplete="email">
+    </div>
+    <div class="auth-field">
+      ${iconEl('check')}
+      <input id="authPassword" type="password" placeholder="${tr('password')}" autocomplete="${su?'new-password':'current-password'}" onkeydown="if(event.key==='Enter') doAuth()">
+    </div>
+    <button class="save-btn" onclick="doAuth()" ${state.authBusy?'disabled':''} style="margin-top:6px; opacity:${state.authBusy?'0.6':'1'};">${su?tr('sign_up'):tr('sign_in')}</button>
+    <button onclick="setAuthMode('${su?'signin':'signup'}')" style="width:100%; border:none; background:none; color:var(--text-soft); font-family:inherit; font-weight:700; font-size:12.5px; padding:16px; cursor:pointer;">${su?tr('have_account'):tr('no_account')}</button>
+  `;
+}
+
+function closeAllOverlays(){
+  closeAddSheet();
+  closeQiSheet();
+  closeInstSheet();
+  closeWalletPage();
+}
+
+fbAuth.onAuthStateChanged((user)=>{
+  const prevUid = state.user?.uid || null;
+  const newUid = user?.uid || null;
+  state.user = user;
+  closeAllOverlays();
+
+  if(user){
+    if(prevUid !== newUid) resetToBlankData(); // clean, empty slate — loadFromServer below fills in real data if this account has any saved
+    state._loading = true; // block autosave until loadFromServer resolves — avoids ever saving blank/reset data over real cloud data
+    document.getElementById('authScreen').classList.add('hidden');
+    document.getElementById('shell').classList.remove('app-hidden');
+    render();
+    loadFromServer();
+  } else {
+    resetToBlankData(); // clear whatever was in memory so the next sign-in starts fresh
+    document.getElementById('shell').classList.add('app-hidden');
+    document.getElementById('authScreen').classList.remove('hidden');
+    renderAuthScreen();
+  }
+});
+
+render();
+</script>
+</body>
+</html>

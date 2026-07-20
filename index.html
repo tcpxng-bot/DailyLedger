@@ -555,6 +555,8 @@
 <div class="sheet" id="qiSheet"></div>
 <div class="sheet-overlay" id="instOverlay"></div>
 <div class="sheet" id="instSheet"></div>
+<div class="sheet-overlay" id="loanOverlay"></div>
+<div class="sheet" id="loanSheet"></div>
 <div class="toast" id="toast"></div>
 
 <script src="https://www.gstatic.com/firebasejs/12.15.0/firebase-app-compat.js"></script>
@@ -670,6 +672,38 @@ const TR = {
   confirm_clear_all:['This deletes everything in this account — every wallet, transaction, and setting — permanently. This cannot be undone. Continue?','การกระทำนี้จะลบทุกอย่างในบัญชีนี้ถาวร — กระเป๋าเงิน รายการ การตั้งค่าทั้งหมด กู้คืนไม่ได้ ยืนยันไหม?'],
   confirm_clear_all_2:['Really sure? Consider exporting a backup first.','แน่ใจจริงๆ นะ? ลองส่งออกข้อมูลสำรองไว้ก่อนดีไหม'],
   toast_data_cleared:['All data cleared','ล้างข้อมูลทั้งหมดแล้ว'],
+  bnpl_title:['Buy Now, Pay Later','บัตร/วงเงินผ่อนชำระ (BNPL)'],
+  bnpl_used_of_limit:['%s used of %s limit','ใช้ไป %s จากวงเงิน %s'],
+  bnpl_total_available:['Total available across providers','วงเงินคงเหลือรวมทุกเจ้า'],
+  bnpl_hint:['%s of this is already counted in "Spent" above — BNPL purchases are real expenses, tracked the same way as everything else.','%s ในนี้ถูกนับรวมอยู่ใน "ใช้ไป" ด้านบนแล้ว — เพราะยอดที่ใช้ผ่าน BNPL ก็คือรายจ่ายจริง นับรวมเหมือนรายการอื่นๆ ทั้งหมด'],
+  due_soon_title:['%s due soon','ใกล้ครบกำหนด %s รายการ'],
+  overdue_by:['Overdue by %s days','เลยกำหนด %s วัน'],
+  due_today:['Due today','ครบกำหนดวันนี้'],
+  due_in_days:['Due in %s days','ครบกำหนดใน %s วัน'],
+  log_income:['Log income','บันทึกรายรับ'],
+  pay_now:['Pay now','จ่ายเลย'],
+  lending_title:['Lending','เงินให้ยืม / เงินที่ติด'],
+  owed_to_you:['Owed to you','เขาติดคุณ'],
+  you_owe:['You owe','คุณติดเขา'],
+  no_loans:['Nothing owed either way — nice.','ไม่มีใครติดเงินใครเลย เยี่ยม'],
+  they_owe_you:['They owe you','เขาติดคุณ'],
+  you_owe_them:['You owe them','คุณติดเขา'],
+  loan_person_ph:['Who? (name)','กับใคร (ชื่อ)'],
+  add_loan:['+ Add','+ เพิ่ม'],
+  edit_loan:['Edit','แก้ไข'],
+  new_loan:['New entry','รายการใหม่'],
+  mark_settled:['Settle','ชำระแล้ว'],
+  reopen:['Reopen','เปิดใหม่'],
+  toast_loan_updated:['Updated','อัปเดตแล้ว'],
+  toast_loan_added:['Added','เพิ่มแล้ว'],
+  toast_loan_settled:['Marked as settled','ทำเครื่องหมายว่าชำระแล้ว'],
+  toast_loan_reopened:['Reopened','เปิดรายการใหม่แล้ว'],
+  safe_to_spend:['Safe to spend','ใช้ได้อย่างปลอดภัย'],
+  sts_good:['HEALTHY','สบายๆ'], sts_tight:['GETTING TIGHT','เริ่มตึง'], sts_over:['OVER COMMITTED','เกินตัวแล้ว'],
+  sts_line_bills:['−%s in bills due this month','−%s ค่าใช้จ่ายประจำที่ยังไม่จ่ายเดือนนี้'],
+  sts_line_inst:['−%s in installment payments due','−%s ค่าผ่อนที่ต้องจ่ายงวดนี้'],
+  sts_line_owed:['−%s you owe friends','−%s ที่ติดเพื่อนอยู่'],
+  sts_clear:['No upcoming bills, installments, or debts pulling this down.','ไม่มีบิล ค่าผ่อน หรือหนี้ค้างที่จะมาลดยอดนี้เลย'],
   toast_server_loaded:['Loaded your saved data','โหลดข้อมูลที่บันทึกไว้แล้ว'],
   app_tagline:['A quiet place for your money story','พื้นที่เงียบๆ สำหรับเรื่องราวการเงินของคุณ'],
   email:['Email','อีเมล'], password:['Password','รหัสผ่าน'],
@@ -735,7 +769,10 @@ const state = {
   lastQuickTxId:null,
   instEditingId:undefined,
   instForm:{},
+  loanEditingId:undefined,
+  loanForm:{},
   lastInstPayment:null,
+  lastRecurringLog:null,
   user:null,
   authMode:'signin',
   authError:'',
@@ -754,11 +791,19 @@ const state = {
     {id:'i2', name:'Motorcycle', icon:'car', color:'accent', totalAmount:60000, installments:24, paid:8, categoryId:'c3', walletId:'w2'},
   ],
 
+  loans:[
+    {id:'l1', person:'Mint', direction:'lent', amount:1500, note:'Concert tickets, split 2 ways', date:'2026-07-10', settled:false},
+    {id:'l2', person:'Poom', direction:'borrowed', amount:600, note:'Taxi home', date:'2026-07-15', settled:false},
+    {id:'l3', person:'Aom', direction:'lent', amount:2000, note:'Birthday dinner', date:'2026-06-20', settled:true},
+  ],
+
   wallets:[
     {id:'w1', name:'Cash', type:'Cash', icon:'wallet', color:'primary', initial:3200, desc:'Everyday pocket money'},
     {id:'w2', name:'KBank', type:'Bank', icon:'landmark', color:'secondary', initial:42500, desc:'Main checking account'},
     {id:'w3', name:'Savings', type:'Savings', icon:'piggy-bank', color:'accent', initial:68000, desc:'Rainy day fund'},
     {id:'w4', name:'Japan Trip', type:'Travel Fund', icon:'plane', color:'secondary', initial:12000, desc:'Saving for Tokyo, Oct'},
+    {id:'w5', name:'SPayLater', type:'BNPL / Buy Now Pay Later', icon:'credit-card', color:'accent', initial:15000, desc:'Shopee credit line'},
+    {id:'w6', name:'LazPayLater', type:'BNPL / Buy Now Pay Later', icon:'shopping-bag', color:'secondary', initial:10000, desc:'Lazada credit line'},
   ],
 
   categories:[
@@ -785,11 +830,11 @@ const state = {
     {categoryId:'c6', limit:1500},
   ],
   recurring:[
-    {id:'r1', name:'Netflix', amount:419, type:'expense', categoryId:'c6', walletId:'w2', freq:'Monthly', schedule:'Day 5', icon:'film'},
-    {id:'r2', name:'Rent', amount:8500, type:'expense', categoryId:'c7', walletId:'w2', freq:'Monthly', schedule:'Day 1', icon:'home'},
-    {id:'r3', name:'Insurance', amount:1200, type:'expense', categoryId:'c5', walletId:'w2', freq:'Monthly', schedule:'Day 15', icon:'heart-pulse'},
-    {id:'r4', name:'Phone', amount:399, type:'expense', categoryId:'c7', walletId:'w1', freq:'Monthly', schedule:'Day 20', icon:'smartphone'},
-    {id:'r5', name:'Salary', amount:45000, type:'income', categoryId:'c11', walletId:'w2', freq:'Monthly', schedule:'Government payroll cycle (date varies)', icon:'banknote'},
+    {id:'r1', name:'Netflix', amount:419, type:'expense', categoryId:'c6', walletId:'w2', freq:'Monthly', schedule:'Day 5', icon:'film', nextDue:'2026-07-25'},
+    {id:'r2', name:'Rent', amount:8500, type:'expense', categoryId:'c7', walletId:'w2', freq:'Monthly', schedule:'Day 1', icon:'home', nextDue:'2026-08-01'},
+    {id:'r3', name:'Insurance', amount:1200, type:'expense', categoryId:'c5', walletId:'w2', freq:'Monthly', schedule:'Day 15', icon:'heart-pulse', nextDue:'2026-08-15'},
+    {id:'r4', name:'Phone', amount:399, type:'expense', categoryId:'c7', walletId:'w1', freq:'Monthly', schedule:'Day 20', icon:'smartphone', nextDue:'2026-07-20'},
+    {id:'r5', name:'Salary', amount:45000, type:'income', categoryId:'c11', walletId:'w2', freq:'Monthly', schedule:'Government payroll cycle (date varies)', icon:'banknote', nextDue:'2026-07-25'},
   ],
   goal:{id:'g1', name:'Japan Trip', icon:'plane', color:'secondary', target:100000, walletId:'w4', targetDate:'2026-10-15'},
 };
@@ -823,6 +868,9 @@ const state = {
   mk(12,9,0,'income','c11','w2',45000,'Monthly salary');
   mk(13,19,0,'expense','c6','w2',420,'Concert stream pass');
   mk(20,9,0,'income','c11','w2',45000,'Monthly salary (last month)');
+  mk(4,11,0,'expense','c4','w5',3200,'New shoes (SPayLater)');
+  mk(9,20,0,'expense','c4','w5',890,'Phone case (SPayLater)');
+  mk(6,15,0,'expense','c4','w6',1450,'Skincare set (LazPayLater)');
 })();
 
 // Snapshot of the fresh demo data, taken once at load — this is only ever
@@ -849,6 +897,7 @@ function resetToBlankData(){
     goal: null,
     quickItems: [],
     installments: [],
+    loans: [],
     accentKey: keepAccent, dark: keepDark, lang: keepLang, theme: keepTheme,
   });
   state.tab = 'home';
@@ -875,6 +924,37 @@ function walletBalance(id){
   return bal;
 }
 function totalBalance(){ return state.wallets.reduce((s,w)=>s+walletBalance(w.id),0); }
+
+// "Safe to spend" — real cash on hand, minus what's already spoken for:
+// bills due this month you haven't paid yet, one installment payment per
+// active plan, and money you owe friends. BNPL wallets are deliberately
+// excluded from "cash on hand" since that's borrowed capacity, not money
+// you actually have.
+function safeToSpendCalc(){
+  const cash = state.wallets
+    .filter(w=> w.type!==BNPL_TYPE)
+    .reduce((s,w)=> s+walletBalance(w.id), 0);
+
+  const now = new Date();
+  const billsDue = state.recurring
+    .filter(r=> r.type==='expense' && r.nextDue)
+    .filter(r=>{
+      const d = new Date(r.nextDue+'T12:00:00');
+      return d.getFullYear()===now.getFullYear() && d.getMonth()===now.getMonth() && daysUntil(r.nextDue)>=0;
+    })
+    .reduce((s,r)=> s+r.amount, 0);
+
+  const installmentDue = state.installments
+    .filter(inst=> inst.paid < inst.installments)
+    .reduce((s,inst)=> s + Math.round(inst.totalAmount/inst.installments), 0);
+
+  const owed = state.loans
+    .filter(l=> !l.settled && l.direction==='borrowed')
+    .reduce((s,l)=> s+l.amount, 0);
+
+  const safe = cash - billsDue - installmentDue - owed;
+  return { cash, billsDue, installmentDue, owed, safe };
+}
 function isSameDay(a,b){ return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate(); }
 function isSameMonth(a,b){ return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth(); }
 function daysAgoDate(n){ const d=new Date(); d.setDate(d.getDate()-n); return d; }
@@ -912,6 +992,62 @@ function showToast(msg, icon='check', action=null){
 }
 
 /* ---------------- RENDER: HOME ---------------- */
+function renderDueSoonBanner(){
+  const DUE_WINDOW_DAYS = 5;
+  const items = state.recurring
+    .filter(r=> r.nextDue)
+    .map(r=> ({...r, daysLeft: daysUntil(r.nextDue)}))
+    .filter(r=> r.daysLeft <= DUE_WINDOW_DAYS)
+    .sort((a,b)=> a.daysLeft - b.daysLeft);
+  if(!items.length) return '';
+
+  return `
+  <div style="padding:14px 20px 0;">
+    <div class="card fade-in" style="padding:6px 16px; border-color:var(--accent-color);">
+      <div style="padding:12px 2px 8px; display:flex; align-items:center; gap:8px;">
+        ${iconEl('calendar-days')}
+        <div style="font-weight:800; font-size:12.5px;">${trf('due_soon_title', items.length)}</div>
+      </div>
+      ${items.map((r,i)=>`
+        <div style="display:flex; align-items:center; gap:12px; padding:11px 0; ${i===items.length-1?'':'border-bottom:1px solid var(--border);'}">
+          <div class="icon-chip" style="width:36px;height:36px;background:${mixAlpha(COLORS.secondary,'55')}; color:${COLOR_INK.secondary};">${iconEl(r.icon)}</div>
+          <div style="flex:1; min-width:0;">
+            <div style="font-weight:700; font-size:13px;">${r.name}</div>
+            <div style="font-size:11px; color:${r.daysLeft<0?'var(--neg)':'var(--text-soft)'}; font-weight:600;">
+              ${r.daysLeft<0 ? trf('overdue_by', Math.abs(r.daysLeft)) : r.daysLeft===0 ? tr('due_today') : trf('due_in_days', r.daysLeft)}
+            </div>
+          </div>
+          <button onclick="logRecurringNow('${r.id}')" style="border:none; background:var(--accent-color); color:var(--accent-color-ink); font-family:inherit; font-weight:800; font-size:11px; padding:8px 13px; border-radius:11px; cursor:pointer; flex-shrink:0;">${r.type==='income'?tr('log_income'):tr('pay_now')}</button>
+        </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function renderSafeToSpend(){
+  const s = safeToSpendCalc();
+  const status = s.safe < 0 ? 'danger' : s.safe < s.cash*0.2 ? 'caution' : 'good';
+  const statusColor = status==='danger' ? 'var(--neg)' : status==='caution' ? '#D9A441' : 'var(--pos)';
+  const statusText = status==='danger' ? tr('sts_over') : status==='caution' ? tr('sts_tight') : tr('sts_good');
+  const breakdownParts = [];
+  if(s.billsDue>0) breakdownParts.push(trf('sts_line_bills', fmt(s.billsDue)));
+  if(s.installmentDue>0) breakdownParts.push(trf('sts_line_inst', fmt(s.installmentDue)));
+  if(s.owed>0) breakdownParts.push(trf('sts_line_owed', fmt(s.owed)));
+
+  return `
+  <div style="padding:0 20px 4px;">
+    <div class="card fade-in" style="padding:20px 22px;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+        <div>
+          <div class="eyebrow">${tr('safe_to_spend')}</div>
+          <div class="serif" style="font-size:clamp(22px,7vw,30px); font-weight:600; margin-top:4px; color:${s.safe<0?'var(--neg)':'var(--text)'}; word-break:break-word;">${s.safe<0?'\u2212':''}${fmt(Math.abs(s.safe))}</div>
+        </div>
+        <div style="background:${mixAlpha(statusColor,'26')}; color:${statusColor}; font-size:10.5px; font-weight:800; padding:6px 11px; border-radius:10px; flex-shrink:0; margin-top:2px;">${statusText}</div>
+      </div>
+      ${breakdownParts.length ? `<div style="font-size:11px; color:var(--text-soft); margin-top:12px; line-height:1.7;">${breakdownParts.join('<br>')}</div>` : `<div style="font-size:11px; color:var(--text-soft); margin-top:12px;">${tr('sts_clear')}</div>`}
+    </div>
+  </div>`;
+}
+
 function renderHome(){
   const bal = totalBalance();
   const today = spentToday();
@@ -927,6 +1063,8 @@ function renderHome(){
     <div class="eyebrow">${greeting()}</div>
     <div class="serif" style="font-size:15px; font-weight:500; margin-top:2px;">${tr('home_sub')}</div>
   </div>
+
+  ${renderDueSoonBanner()}
 
   <div style="padding:14px 20px 4px;">
     <div class="card fade-in" style="padding:26px 24px; text-align:center;">
@@ -945,6 +1083,8 @@ function renderHome(){
       </div>
     </div>
   </div>
+
+  ${renderSafeToSpend()}
 
   <div style="padding:18px 0 4px;">
     <div style="display:flex; align-items:center; justify-content:space-between; padding:0 20px 10px;">
@@ -1286,6 +1426,47 @@ function insights(){
   return out.slice(0,4);
 }
 
+function renderBnplSection(){
+  const bnplWallets = state.wallets.filter(w=> w.type===BNPL_TYPE);
+  if(!bnplWallets.length) return '';
+
+  let totalLimit = 0, totalAvailable = 0;
+  const rows = bnplWallets.map(w=>{
+    const limit = w.initial;
+    const available = walletBalance(w.id);
+    const used = Math.max(0, limit - available);
+    totalLimit += limit; totalAvailable += available;
+    const pct = limit>0 ? Math.min(100, Math.round((used/limit)*100)) : 0;
+    return `
+    <div style="padding:14px 0; border-bottom:1px solid var(--border);">
+      <div onclick="openWalletPage('${w.id}')" style="display:flex; align-items:center; gap:12px; cursor:pointer;">
+        <div class="icon-chip" style="background:${mixAlpha(COLORS[w.color],'55')}; color:${COLOR_INK[w.color]};">${iconEl(w.icon)}</div>
+        <div style="flex:1; min-width:0;">
+          <div style="font-weight:700; font-size:13.5px;">${w.name}</div>
+          <div style="font-size:11px; color:var(--text-soft);">${trf('bnpl_used_of_limit', fmt(used), fmt(limit))}</div>
+        </div>
+        <div style="font-size:12.5px; font-weight:700; color:var(--text-soft); flex-shrink:0;">${fmt(available)}</div>
+      </div>
+      <div class="progress-track" style="margin-top:10px;"><div class="progress-fill" style="width:${pct}%; background:${pct>90?'var(--neg)':COLORS[w.color]};"></div></div>
+    </div>`;
+  }).join('');
+
+  const totalUsed = Math.max(0, totalLimit - totalAvailable);
+
+  return `
+  <div style="padding:20px 20px 4px;">
+    <div class="eyebrow" style="margin-bottom:10px;">${tr('bnpl_title')}</div>
+    <div class="card" style="padding:6px 18px;">
+      ${rows}
+      <div style="padding:14px 0; display:flex; justify-content:space-between; align-items:center;">
+        <div style="font-size:12px; color:var(--text-soft); font-weight:700;">${tr('bnpl_total_available')}</div>
+        <div class="serif" style="font-size:18px; font-weight:600;">${fmt(totalAvailable)}</div>
+      </div>
+    </div>
+    <div style="font-size:11px; color:var(--text-soft); padding:8px 4px 0; line-height:1.5;">${trf('bnpl_hint', fmt(totalUsed))}</div>
+  </div>`;
+}
+
 function renderBudget(){
   const m = monthTotals();
   const list = insights();
@@ -1314,6 +1495,8 @@ function renderBudget(){
       </div>
     </div>
   </div>
+
+  ${renderBnplSection()}
 
   <div style="padding:20px 20px 4px;">
     <div class="eyebrow" style="margin-bottom:10px;">${tr('category_budgets')}</div>
@@ -1394,6 +1577,49 @@ function renderGoalCard(){
 }
 
 /* ---------------- RENDER: PROFILE ---------------- */
+function renderLoansSection(){
+  const active = state.loans.filter(l=>!l.settled);
+  const settled = state.loans.filter(l=>l.settled);
+  const owedToYou = active.filter(l=>l.direction==='lent').reduce((s,l)=>s+l.amount,0);
+  const youOwe = active.filter(l=>l.direction==='borrowed').reduce((s,l)=>s+l.amount,0);
+
+  const combined = [...active, ...settled];
+  const row = (l, isLast)=>`
+    <div style="display:flex; align-items:center; gap:12px; padding:12px 0; ${isLast?'':'border-bottom:1px solid var(--border);'} ${l.settled?'opacity:0.5;':''}">
+      <div onclick="openLoanSheet('${l.id}')" style="display:flex; align-items:center; gap:12px; flex:1; min-width:0; cursor:pointer;">
+        <div class="icon-chip" style="background:${l.direction==='lent'?mixAlpha('var(--pos)','33'):mixAlpha('var(--neg)','33')}; color:${l.direction==='lent'?'var(--pos)':'var(--neg)'};">${iconEl(l.direction==='lent'?'arrow-down-left':'arrow-up-right')}</div>
+        <div style="flex:1; min-width:0;">
+          <div style="font-weight:700; font-size:13.5px; ${l.settled?'text-decoration:line-through;':''}">${l.person}</div>
+          <div style="font-size:11px; color:var(--text-soft); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${l.note || (l.direction==='lent'?tr('they_owe_you'):tr('you_owe_them'))}</div>
+        </div>
+      </div>
+      <div style="font-weight:800; font-size:13px; color:${l.direction==='lent'?'var(--pos)':'var(--neg)'}; flex-shrink:0;">${fmt(l.amount)}</div>
+      <button onclick="toggleLoanSettled('${l.id}')" style="border:1px solid var(--border); background:var(--card); border-radius:10px; padding:6px 10px; font-family:inherit; font-weight:700; font-size:10.5px; color:var(--text-soft); cursor:pointer; flex-shrink:0;">${l.settled?tr('reopen'):tr('mark_settled')}</button>
+    </div>`;
+
+  return `
+  <div style="padding:20px 20px 4px;">
+    <div class="eyebrow" style="margin-bottom:10px;">${tr('lending_title')}</div>
+    <div class="card" style="padding:18px 16px; display:flex; justify-content:space-between; gap:8px; margin-bottom:12px;">
+      <div style="flex:1; min-width:0;">
+        <div class="eyebrow">${tr('owed_to_you')}</div>
+        <div class="serif" style="font-size:clamp(15px,5vw,20px); color:var(--pos); margin-top:2px;">${fmt(owedToYou)}</div>
+      </div>
+      <div style="width:1px; background:var(--border); flex-shrink:0;"></div>
+      <div style="flex:1; min-width:0;">
+        <div class="eyebrow">${tr('you_owe')}</div>
+        <div class="serif" style="font-size:clamp(15px,5vw,20px); color:var(--neg); margin-top:2px;">${fmt(youOwe)}</div>
+      </div>
+    </div>
+    <div class="card" style="padding:4px 18px;">
+      ${combined.length ? combined.map((l,i)=>row(l, i===combined.length-1)).join('') : `<div style="padding:20px 4px; text-align:center; color:var(--text-soft); font-size:12.5px;">${tr('no_loans')}</div>`}
+      <div style="padding:14px 0;">
+        <button onclick="openLoanSheet(null)" style="width:100%; border:1.5px dashed var(--border); background:none; border-radius:14px; padding:12px; font-family:inherit; font-weight:700; font-size:13px; color:var(--text-soft); cursor:pointer;">${tr('add_loan')}</button>
+      </div>
+    </div>
+  </div>`;
+}
+
 function renderProfile(){
   return `
   <div class="topbar">
@@ -1439,18 +1665,22 @@ function renderProfile(){
   <div style="padding:20px 20px 4px;">
     <div class="eyebrow" style="margin-bottom:10px;">${tr('recurring')}</div>
     <div class="card" style="padding:4px 18px;">
-      ${state.recurring.map((r,i)=>`
+      ${state.recurring.map((r,i)=>{
+        const dLeft = r.nextDue ? daysUntil(r.nextDue) : null;
+        const dueLabel = dLeft===null ? '' : dLeft<0 ? trf('overdue_by', Math.abs(dLeft)) : dLeft===0 ? tr('due_today') : trf('due_in_days', dLeft);
+        return `
         <div style="display:flex; align-items:center; gap:10px; padding:13px 0; ${i===state.recurring.length-1?'':'border-bottom:1px solid var(--border);'}">
           <div onclick="editRecurring('${r.id}')" style="display:flex; align-items:center; gap:12px; flex:1; min-width:0; cursor:pointer;">
-            <div class="icon-chip" style="background:${COLORS.secondary}55; color:${COLOR_INK.secondary};">${iconEl(r.icon)}</div>
+            <div class="icon-chip" style="background:${mixAlpha(COLORS.secondary,'55')}; color:${COLOR_INK.secondary};">${iconEl(r.icon)}</div>
             <div style="flex:1; min-width:0;">
               <div style="font-weight:700; font-size:13.5px;">${r.name}</div>
-              <div style="font-size:11px; color:var(--text-soft); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${r.freq} · ${r.schedule} · ${walletById(r.walletId)?.name || ''}</div>
+              <div style="font-size:11px; color:${dLeft!==null && dLeft<0 ? 'var(--neg)' : 'var(--text-soft)'}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${r.freq} · ${r.schedule}${dueLabel ? ' · '+dueLabel : ''}</div>
             </div>
           </div>
           <div style="font-weight:800; font-size:13px; color:${r.type==='income'?'var(--pos)':'var(--neg)'}; flex-shrink:0;">${r.type==='income'?'+':'\u2212'} ${fmt(r.amount)}</div>
           <button onclick="event.stopPropagation(); deleteRecurringPrompt('${r.id}')" style="border:none;background:none;color:var(--text-soft);padding:4px; flex-shrink:0;">${iconEl('trash-2')}</button>
-        </div>`).join('')}
+        </div>`;
+      }).join('')}
       <div style="padding:14px 0;">
         <button onclick="addRecurring()" style="width:100%; border:1.5px dashed var(--border); background:none; border-radius:14px; padding:12px; font-family:inherit; font-weight:700; font-size:13px; color:var(--text-soft); cursor:pointer;">${tr('add_recurring')}</button>
       </div>
@@ -1509,6 +1739,8 @@ function renderProfile(){
     </div>
     <div style="font-size:11px; color:var(--text-soft); padding:8px 4px 0;">${tr('installments_hint')}</div>
   </div>
+
+  ${renderLoansSection()}
 
   <div style="padding:20px 20px 4px;">
     <div class="eyebrow" style="margin-bottom:10px;">${tr('appearance')}</div>
@@ -1612,7 +1844,8 @@ window.editRecurring = (id)=>{
   const amount = parseFloat(prompt('Amount (THB)', r.amount)) || r.amount;
   const freq = prompt('Frequency (e.g. Monthly, Every 2 weeks)', r.freq) || r.freq;
   const schedule = prompt('When does it land? (e.g. "Day 25", "Government payroll cycle, varies", "Last business day")', r.schedule) || r.schedule;
-  r.name = name; r.type = type; r.amount = amount; r.freq = freq; r.schedule = schedule;
+  const nextDue = prompt('Next due date (YYYY-MM-DD)', r.nextDue || new Date().toISOString().slice(0,10)) || r.nextDue;
+  r.name = name; r.type = type; r.amount = amount; r.freq = freq; r.schedule = schedule; r.nextDue = nextDue;
   showToast(tr('toast_recurring_updated'),'check');
   render();
 };
@@ -1623,9 +1856,10 @@ window.addRecurring = ()=>{
   const amount = parseFloat(prompt('Amount (THB)','0')) || 0;
   const freq = prompt('Frequency (e.g. Monthly, Every 2 weeks)','Monthly') || 'Monthly';
   const schedule = prompt('When does it land? (e.g. "Day 25", "Government payroll cycle, varies")','Day 1') || 'Day 1';
+  const nextDue = prompt('Next due date (YYYY-MM-DD)', new Date().toISOString().slice(0,10)) || new Date().toISOString().slice(0,10);
   const walletId = state.wallets[0]?.id;
   const categoryId = state.categories.find(c=>c.type===type)?.id;
-  state.recurring.push({id:newId(), name, type, amount, freq, schedule, walletId, categoryId, icon: type==='income'?'banknote':'receipt'});
+  state.recurring.push({id:newId(), name, type, amount, freq, schedule, walletId, categoryId, icon: type==='income'?'banknote':'receipt', nextDue});
   showToast(tr('toast_recurring_added'),'sparkles');
   render();
 };
@@ -1638,6 +1872,48 @@ window.deleteRecurringPrompt = (id)=>{
     render();
   }
 };
+
+// Simple heuristic to push a recurring item's due date forward after it's logged.
+// Looks for a number of weeks/months/days/years in the frequency text; defaults to +1 month.
+function advanceDate(dateStr, freqText){
+  const d = new Date(dateStr + 'T12:00:00');
+  const f = (freqText||'').toLowerCase();
+  const numMatch = f.match(/(\d+)/);
+  const n = numMatch ? parseInt(numMatch[1]) : 1;
+  if(f.includes('week')) d.setDate(d.getDate() + 7*n);
+  else if(f.includes('day')) d.setDate(d.getDate() + n);
+  else if(f.includes('year')) d.setFullYear(d.getFullYear() + n);
+  else d.setMonth(d.getMonth() + n); // default: monthly
+  return d.toISOString().slice(0,10);
+}
+window.logRecurringNow = (id)=>{
+  const r = state.recurring.find(x=>x.id===id);
+  if(!r) return;
+  const tx = {id:newId(), type:r.type, categoryId:r.categoryId, walletId:r.walletId, toWalletId:null, amount:r.amount, note:r.name, date:new Date().toISOString(), photo:null};
+  state.transactions.push(tx);
+  const prevDue = r.nextDue;
+  r.nextDue = advanceDate(r.nextDue || new Date().toISOString().slice(0,10), r.freq);
+  state.lastRecurringLog = { recurringId:id, txId:tx.id, prevDue };
+  showToast(trf('toast_logged', r.name), 'zap', {label:tr('toast_undo'), onclick:'undoRecurringLog()'});
+  render();
+};
+window.undoRecurringLog = ()=>{
+  if(!state.lastRecurringLog) return;
+  const { recurringId, txId, prevDue } = state.lastRecurringLog;
+  state.transactions = state.transactions.filter(t=>t.id!==txId);
+  const r = state.recurring.find(x=>x.id===recurringId);
+  if(r) r.nextDue = prevDue;
+  state.lastRecurringLog = null;
+  document.getElementById('toast').classList.remove('show');
+  showToast(tr('toast_removed'),'trash-2');
+  render();
+};
+function daysUntil(dateStr){
+  const today = new Date(); today.setHours(0,0,0,0);
+  const d = new Date(dateStr + 'T00:00:00');
+  return Math.round((d-today)/(1000*60*60*24));
+}
+
 window.toggleDark = ()=>{ state.dark = !state.dark; document.documentElement.classList.toggle('dark', state.dark); render(); };
 window.setTheme = (t)=>{
   state.theme = t;
@@ -1670,7 +1946,7 @@ function buildBackupObject(){
     version:1, exportedAt:new Date().toISOString(),
     wallets:state.wallets, categories:state.categories, transactions:state.transactions,
     budgets:state.budgets, recurring:state.recurring, goal:state.goal,
-    quickItems:state.quickItems, installments:state.installments,
+    quickItems:state.quickItems, installments:state.installments, loans:state.loans,
     accentKey:state.accentKey, dark:state.dark, lang:state.lang, theme:state.theme,
   };
 }
@@ -1684,6 +1960,7 @@ function applyBackup(data){
   if(data.goal !== undefined) state.goal = data.goal;
   if(Array.isArray(data.quickItems)) state.quickItems = data.quickItems;
   if(Array.isArray(data.installments)) state.installments = data.installments;
+  if(Array.isArray(data.loans)) state.loans = data.loans;
   if(data.accentKey){ setAccent(data.accentKey); }
   if(typeof data.dark==='boolean'){ state.dark = data.dark; document.documentElement.classList.toggle('dark', state.dark); }
   if(data.lang){ state.lang = data.lang; document.documentElement.classList.toggle('lang-th', state.lang==='th'); }
@@ -1773,7 +2050,8 @@ function downloadBlob(content, filename, type){
 }
 
 /* ---------------- WALLET DETAIL PAGE ---------------- */
-const WALLET_TYPES = ['Cash','Bank','Savings','Credit Card','Investment','E-Wallet','Travel Fund','Custom'];
+const WALLET_TYPES = ['Cash','Bank','Savings','Credit Card','BNPL / Buy Now Pay Later','Investment','E-Wallet','Travel Fund','Custom'];
+const BNPL_TYPE = 'BNPL / Buy Now Pay Later';
 
 window.openWalletPage = (id)=>{
   if(id){
@@ -2305,6 +2583,95 @@ function renderInstSheet(){
     ${state.instEditingId ? `<button onclick="deleteInstItem('${state.instEditingId}')" style="width:100%; border:none; background:none; color:var(--neg); font-family:inherit; font-weight:700; font-size:13px; padding:14px; cursor:pointer;">${tr('remove')}</button>` : ''}
   `;
 }
+
+/* ---------------- LENDING / LOANS ---------------- */
+window.openLoanSheet = (id)=>{
+  if(id){
+    const l = state.loans.find(x=>x.id===id);
+    if(!l) return;
+    state.loanEditingId = id;
+    state.loanForm = { ...l };
+  } else {
+    state.loanEditingId = null;
+    state.loanForm = { person:'', direction:'lent', amount:'', note:'', date:new Date().toISOString().slice(0,10), settled:false };
+  }
+  renderLoanSheet();
+  document.getElementById('loanOverlay').classList.add('open');
+  document.getElementById('loanSheet').classList.add('open');
+};
+window.closeLoanSheet = ()=>{
+  document.getElementById('loanOverlay').classList.remove('open');
+  document.getElementById('loanSheet').classList.remove('open');
+};
+window.loanSetDirection = (d)=>{ state.loanForm.direction = d; renderLoanSheet(); };
+
+window.saveLoanItem = ()=>{
+  const person = (document.getElementById('loanPerson')?.value || '').trim();
+  const amount = parseFloat(document.getElementById('loanAmount')?.value);
+  const note = document.getElementById('loanNote')?.value || '';
+  const date = document.getElementById('loanDate')?.value || new Date().toISOString().slice(0,10);
+  if(!person){ showToast(tr('err_name'),'circle-alert'); return; }
+  if(!amount || amount<=0){ showToast(tr('err_amount'),'circle-alert'); return; }
+  state.loanForm.person = person; state.loanForm.amount = amount; state.loanForm.note = note; state.loanForm.date = date;
+
+  if(state.loanEditingId){
+    const l = state.loans.find(x=>x.id===state.loanEditingId);
+    Object.assign(l, state.loanForm);
+    showToast(tr('toast_loan_updated'),'check');
+  } else {
+    state.loans.push({ id:newId(), ...state.loanForm });
+    showToast(tr('toast_loan_added'),'sparkles');
+  }
+  closeLoanSheet();
+  render();
+};
+window.deleteLoanItem = (id)=>{
+  state.loans = state.loans.filter(x=>x.id!==id);
+  closeLoanSheet();
+  showToast(tr('toast_removed'),'trash-2');
+  render();
+};
+window.toggleLoanSettled = (id)=>{
+  const l = state.loans.find(x=>x.id===id);
+  if(!l) return;
+  l.settled = !l.settled;
+  showToast(l.settled ? tr('toast_loan_settled') : tr('toast_loan_reopened'), 'check');
+  render();
+};
+
+function renderLoanSheet(){
+  const f = state.loanForm;
+  document.getElementById('loanSheet').innerHTML = `
+    <div class="sheet-handle"></div>
+    <div class="eyebrow" style="margin-bottom:10px;">${state.loanEditingId ? tr('edit_loan') : tr('new_loan')}</div>
+    <div class="segmented">
+      <button class="${f.direction==='lent'?'active':''}" onclick="loanSetDirection('lent')">${tr('they_owe_you')}</button>
+      <button class="${f.direction==='borrowed'?'active':''}" onclick="loanSetDirection('borrowed')">${tr('you_owe_them')}</button>
+    </div>
+
+    <div class="card" style="padding:2px 16px; margin-top:14px;">
+      <div class="field-row">
+        ${iconEl('pen-line')}
+        <input id="loanPerson" placeholder="${tr('loan_person_ph')}" value="${(f.person||'').replace(/"/g,'&quot;')}" maxlength="30">
+      </div>
+      <div class="field-row">
+        ${iconEl('banknote')}
+        <input id="loanAmount" type="number" placeholder="${tr('total_amount')}" value="${f.amount||''}" min="0" step="0.01">
+      </div>
+      <div class="field-row">
+        ${iconEl('calendar')}
+        <input id="loanDate" type="date" value="${f.date}">
+      </div>
+      <div class="field-row">
+        ${iconEl('pen-line')}
+        <input id="loanNote" placeholder="${tr('add_note')}" value="${(f.note||'').replace(/"/g,'&quot;')}" maxlength="60">
+      </div>
+    </div>
+
+    <button class="save-btn" onclick="saveLoanItem()">${state.loanEditingId ? tr('save_changes') : tr('add_loan')}</button>
+    ${state.loanEditingId ? `<button onclick="deleteLoanItem('${state.loanEditingId}')" style="width:100%; border:none; background:none; color:var(--neg); font-family:inherit; font-weight:700; font-size:13px; padding:14px; cursor:pointer;">${tr('remove')}</button>` : ''}
+  `;
+}
 window.renderInstSheet_livePreview = ()=>{
   const total = parseFloat(document.getElementById('instTotal')?.value);
   const count = parseInt(document.getElementById('instCount')?.value);
@@ -2346,6 +2713,7 @@ document.getElementById('fabBtn').addEventListener('click', ()=> openAddSheet('e
 document.getElementById('overlay').addEventListener('click', closeAddSheet);
 document.getElementById('qiOverlay').addEventListener('click', closeQiSheet);
 document.getElementById('instOverlay').addEventListener('click', closeInstSheet);
+document.getElementById('loanOverlay').addEventListener('click', closeLoanSheet);
 
 /* ---------------- AUTH ---------------- */
 function authErrorMessage(code){
@@ -2406,6 +2774,7 @@ function closeAllOverlays(){
   closeAddSheet();
   closeQiSheet();
   closeInstSheet();
+  closeLoanSheet();
   closeWalletPage();
 }
 

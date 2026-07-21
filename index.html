@@ -15,27 +15,29 @@
 <link href="https://fonts.googleapis.com/css2?family=Trirong:wght@300;400;500;600;700&family=Athiti:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#FAF8F5;
+    --bg:#FFFDFC;
+    --bg-secondary:#FFF5F8;
     --card:#FFFFFF;
-    --primary:#A8C8B8;
-    --primary-ink:#4F6E5F;
-    --secondary:#C7DDE8;
-    --secondary-ink:#3F6478;
-    --accent:#E8CFCB;
-    --accent-ink:#8A544C;
-    --text:#3A3A3A;
-    --text-soft:#8B8782;
-    --border:#ECECEC;
-    --shadow: 0 10px 30px -12px rgba(58,58,58,0.10);
-    --shadow-lift: 0 18px 40px -16px rgba(58,58,58,0.18);
+    --primary:#A8E6C3;
+    --primary-ink:#2E7D4F;
+    --secondary:#AEE4F8;
+    --secondary-ink:#1D6FA5;
+    --accent:#F7B6CC;
+    --accent-ink:#B23D65;
+    --text:#3E3345;
+    --text-soft:#8C7D88;
+    --border:rgba(0,0,0,.05);
+    --shadow: 0 12px 40px rgba(62,51,69,.07);
+    --shadow-lift: 0 20px 60px rgba(62,51,69,.12);
     --radius:24px;
     --accent-color: var(--primary);
     --accent-color-ink: var(--primary-ink);
-    --neg:#C98B84;
-    --pos:#7FA88F;
+    --neg:#F1949E;
+    --pos:#6FCB9A;
   }
   html.dark{
     --bg:#181715;
+    --bg-secondary:#221F1C;
     --card:#221F1C;
     --primary:#7FA08F;
     --primary-ink:#B9D6C7;
@@ -53,6 +55,7 @@
   }
   html.theme-playful{
     --bg:#FFF6E9;
+    --bg-secondary:#FFEFDC;
     --card:#FFFFFF;
     --primary:#33C481;
     --primary-ink:#0E7A4B;
@@ -70,6 +73,7 @@
   }
   html.theme-playful.dark{
     --bg:#201A2E;
+    --bg-secondary:#2A2340;
     --card:#2C2340;
     --primary:#4ADE80;
     --primary-ink:#BEF7D3;
@@ -87,6 +91,7 @@
   }
   html.theme-cute{
     --bg:#FFF0F5;
+    --bg-secondary:#FFE5EF;
     --card:#FFFFFF;
     --primary:#FF9EC4;
     --primary-ink:#C2447D;
@@ -104,6 +109,7 @@
   }
   html.theme-cute.dark{
     --bg:#2B1F2B;
+    --bg-secondary:#382837;
     --card:#3A2A3A;
     --primary:#FF9EC4;
     --primary-ink:#FFD6E8;
@@ -120,6 +126,9 @@
     --pos:#7ED6A5;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  button{ transition: transform .15s cubic-bezier(.22,1,.36,1), opacity .15s ease; }
+  button:active{ transform:scale(.95); }
+  .fade-in{ animation:fadeIn .45s cubic-bezier(.22,1,.36,1) both; }
   html,body{height:100%;}
   body{
     margin:0;
@@ -158,6 +167,18 @@
     border-radius:var(--radius);
     box-shadow:var(--shadow);
   }
+  .hero-card{
+    background: linear-gradient(160deg, var(--card) 55%, var(--bg-secondary) 130%);
+  }
+  .hero-orb{
+    position:absolute; border-radius:50%; pointer-events:none; z-index:0;
+    filter:blur(2px);
+  }
+  .hero-orb-1{ width:180px; height:180px; top:-70px; right:-60px; background:var(--secondary); opacity:.16; }
+  .hero-orb-2{ width:120px; height:120px; bottom:-50px; left:-40px; background:var(--accent); opacity:.14; }
+  .hero-stat{
+    flex:1; min-width:0; border-radius:16px; padding:10px 8px 11px;
+  }
   .icon-chip{
     width:44px; height:44px; border-radius:16px;
     display:flex; align-items:center; justify-content:center;
@@ -179,28 +200,33 @@
   }
   .wallet-card{
     scroll-snap-align:start;
-    min-width:210px; height:132px;
-    border-radius:22px; padding:18px;
+    min-width:216px; height:140px;
+    border-radius:24px; padding:20px;
     position:relative; overflow:hidden;
     color:#3A3A3A;
     display:flex; flex-direction:column; justify-content:space-between;
-    box-shadow: var(--shadow);
-    transition:transform .25s ease;
+    box-shadow: var(--shadow-lift);
+    transition:transform .25s cubic-bezier(.22,1,.36,1);
   }
-  .wallet-card:active{ transform:scale(.97); }
+  .wallet-card:active{ transform:scale(.96); }
   .wallet-card::after{
-    content:''; position:absolute; right:-30px; top:-30px;
-    width:120px; height:120px; border-radius:50%;
-    background:rgba(255,255,255,.25);
+    content:''; position:absolute; right:-34px; top:-34px;
+    width:130px; height:130px; border-radius:50%;
+    background:rgba(255,255,255,.22);
+  }
+  .wallet-card::before{
+    content:''; position:absolute; left:-24px; bottom:-30px;
+    width:80px; height:80px; border-radius:50%;
+    background:rgba(255,255,255,.12);
   }
   .wallet-card .wtop{ display:flex; justify-content:space-between; align-items:flex-start; z-index:1;}
   .wallet-card .wicon{
-    width:34px; height:34px; border-radius:11px; background:rgba(255,255,255,.55);
+    width:36px; height:36px; border-radius:12px; background:rgba(255,255,255,.5);
     display:flex; align-items:center; justify-content:center;
   }
   .wallet-card .wicon svg{ width:17px; height:17px; }
   .wallet-add{
-    min-width:120px; height:132px; border-radius:22px;
+    min-width:120px; height:140px; border-radius:24px;
     border:1.5px dashed var(--border);
     display:flex; flex-direction:column; align-items:center; justify-content:center;
     gap:6px; color:var(--text-soft); font-size:12px; font-weight:600;
@@ -292,17 +318,17 @@
   .pill{
     display:flex; flex-direction:column; align-items:center; gap:6px;
     padding:10px 4px; border-radius:16px; border:1.5px solid transparent;
-    cursor:pointer; transition:all .18s ease;
+    cursor:pointer; transition:all .2s cubic-bezier(.22,1,.36,1);
   }
-  .pill.selected{ border-color:var(--text); }
+  .pill.selected{ border-color:var(--accent-color); transform:scale(1.06); }
   .pill span{ font-size:10.5px; font-weight:700; color:var(--text-soft); text-align:center; }
-  .pill.selected span{ color:var(--text); }
+  .pill.selected span{ color:var(--text); font-weight:800; }
 
   .save-btn{
-    width:100%; padding:16px; border:none; border-radius:18px;
+    width:100%; padding:18px; border:none; border-radius:19px;
     background:var(--accent-color); color:var(--accent-color-ink); font-family:inherit;
-    font-weight:800; font-size:15px; letter-spacing:.01em; cursor:pointer;
-    margin-top:16px; transition:transform .15s ease, background .25s ease, color .25s ease;
+    font-weight:800; font-size:16px; letter-spacing:.01em; cursor:pointer;
+    margin-top:16px; transition:transform .15s cubic-bezier(.22,1,.36,1), background .25s ease, color .25s ease;
   }
   .save-btn:active{ transform:scale(.97); }
 
@@ -319,6 +345,13 @@
     content:''; position:absolute; left:-5px; top:50%; transform:translateY(-50%);
     width:8px; height:8px; border-radius:50%; background:var(--border);
   }
+  .tl-swipe-wrap{ position:relative; overflow:hidden; padding-left:6px; margin-left:-6px; }
+  .tl-swipe-delete{
+    position:absolute; top:0; right:0; bottom:0; width:76px;
+    background:var(--neg); color:#fff; display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+  }
+  .tl-swipe-content{ background:var(--card); position:relative; touch-action:pan-y; will-change:transform; }
   .tl-time{ font-size:10.5px; color:var(--text-soft); font-weight:700; width:36px; flex-shrink:0; }
 
   .progress-track{ height:8px; border-radius:6px; background:var(--bg); border:1px solid var(--border); overflow:hidden; }
@@ -327,9 +360,10 @@
   .chip{
     padding:7px 13px; border-radius:14px; border:1px solid var(--border);
     font-size:12px; font-weight:700; color:var(--text-soft); background:var(--card);
-    white-space:nowrap; cursor:pointer; transition:all .18s ease;
+    white-space:nowrap; cursor:pointer; transition:all .18s cubic-bezier(.22,1,.36,1);
+    display:inline-block;
   }
-  .chip.active{ background:var(--accent-color); color:var(--accent-color-ink); border-color:var(--accent-color); }
+  .chip.active{ background:var(--accent-color); color:var(--accent-color-ink); border-color:var(--accent-color); transform:scale(1.05); }
 
   .toast{
     position:fixed; left:50%; bottom:110px; transform:translate(-50%,20px);
@@ -340,7 +374,6 @@
   }
   .toast.show{ opacity:1; transform:translate(-50%,0); }
 
-  .fade-in{ animation:fadeIn .4s ease both; }
   @keyframes fadeIn{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
 
   .tab-panel{ display:none; }
@@ -375,7 +408,7 @@
     font-size:14.5px; color:var(--text); width:100%; font-weight:600;
   }
   .auth-error{
-    background:var(--accent)33; color:var(--neg); font-size:12.5px; font-weight:700;
+    background:color-mix(in srgb, var(--accent) 20%, transparent); color:var(--neg); font-size:12.5px; font-weight:700;
     padding:10px 14px; border-radius:12px; margin-bottom:12px; display:none;
   }
   .auth-error.show{ display:block; }
@@ -593,7 +626,9 @@ const TR = {
   quick_log:['Quick log','บันทึกด่วน'], tap_to_log:['tap to log instantly','แตะเพื่อบันทึกทันที'], add:['Add','เพิ่ม'],
   todays_spending:["Today's spending",'ใช้จ่ายวันนี้'], budget_used:['Budget used','งบที่ใช้ไป'],
   recent_entries:['Recent entries','รายการล่าสุด'], view_all:['View all','ดูทั้งหมด'],
-  empty_recent:['Nothing recorded yet — tap + to start your ledger.','ยังไม่มีรายการ — แตะ + เพื่อเริ่มบันทึก'],
+  empty_recent_title:['No entries yet','ยังไม่มีรายการ'],
+  empty_recent:["Let's record your first expense today.",'มาบันทึกรายจ่ายแรกของวันนี้กันเถอะ'],
+  empty_recent_cta:['+ Add an entry','+ เพิ่มรายการ'],
   journal:['Journal','บันทึก'], timeline_title:['Timeline','ไทม์ไลน์'],
   search_ph:['Search notes, categories, amounts','ค้นหาโน้ต หมวดหมู่ จำนวนเงิน'],
   all_wallets:['All wallets','ทุกกระเป๋าเงิน'], all_categories:['All categories','ทุกหมวดหมู่'],
@@ -603,6 +638,11 @@ const TR = {
   this_month:['This month','เดือนนี้'], budget_title:['Budget','งบประมาณ'],
   spent:['Spent','ใช้ไป'], earned:['Earned','ได้รับ'], net:['Net','สุทธิ'],
   category_budgets:['Category budgets','งบตามหมวดหมู่'], remaining:['remaining','คงเหลือ'], over_by:['Over by','เกินไป'],
+  monthly_overview:['Monthly overview','ภาพรวมเดือนนี้'],
+  overview_hint:['%s spent of %s budgeted across all categories.','ใช้ไป %s จากงบที่ตั้งไว้ %s รวมทุกหมวดหมู่'],
+  day_streak:['day streak','วันติดต่อกัน'], entries:['entries','รายการ'],
+  best_month_line:['Best month so far: %s (net +%s)','เดือนที่ดีที่สุด: %s (สุทธิ +%s)'],
+  favorite_category_line:['Spending most on %s this month','ใช้จ่ายเยอะสุดในหมวด %s เดือนนี้'],
   smart_insight:['Smart insight','ข้อมูลเชิงลึก'], savings_goal:['Savings goal','เป้าหมายการออม'],
   goal_reached:['Goal reached — well done!','ถึงเป้าหมายแล้ว — เยี่ยมมาก!'],
   goal_label:['Goal','เป้าหมาย'],
@@ -641,6 +681,7 @@ const TR = {
   toast_wallet_updated:['Wallet updated','อัปเดตกระเป๋าเงินแล้ว'], toast_wallet_created:['Wallet created','สร้างกระเป๋าเงินแล้ว'],
   toast_wallet_removed:['Wallet removed','ลบกระเป๋าเงินแล้ว'], toast_qty_updated:['Quick item updated','อัปเดตรายการด่วนแล้ว'],
   toast_qty_added:['Quick item added','เพิ่มรายการด่วนแล้ว'], toast_removed:['Removed','ลบแล้ว'],
+  toast_tx_deleted:['Entry deleted','ลบรายการแล้ว'],
   toast_income_added:['Income added','บันทึกรายรับแล้ว'], toast_expense_added:['Expense added','บันทึกรายจ่ายแล้ว'],
   toast_transfer_recorded:['Transfer recorded','บันทึกการโอนแล้ว'], toast_csv_exported:['CSV exported','ส่งออก CSV แล้ว'],
   toast_backup_saved:['Backup saved','สำรองข้อมูลแล้ว'], toast_recurring_updated:['Recurring updated','อัปเดตรายการประจำแล้ว'],
@@ -784,6 +825,7 @@ const state = {
   loanForm:{},
   lastInstPayment:null,
   lastRecurringLog:null,
+  lastDeletedTx:null,
   user:null,
   authMode:'signin',
   authError:'',
@@ -920,6 +962,23 @@ const fmtSigned = (n,type) => (type==='income' ? '+ ' : type==='expense' ? '\u22
 const catById = id => state.categories.find(c=>c.id===id);
 const walletById = id => state.wallets.find(w=>w.id===id);
 const iconEl = (name) => `<svg class="icon-svg"><use href="#icon-${name}"></use></svg>`;
+
+// Animated circular progress ring (Apple Health style). Uses a native SVG
+// <animate> so it plays automatically whenever inserted, no JS timing needed.
+function ringSVG(pct, opts={}){
+  const size = opts.size || 64, stroke = opts.stroke || 8;
+  const color = opts.color || 'var(--accent-color)', track = opts.track || 'var(--border)';
+  const r = (size - stroke) / 2;
+  const c = 2 * Math.PI * r;
+  const clamped = Math.min(100, Math.max(0, pct));
+  const offset = c * (1 - clamped/100);
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="transform:rotate(-90deg); flex-shrink:0;">
+    <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="${track}" stroke-width="${stroke}"/>
+    <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="${color}" stroke-width="${stroke}" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c}">
+      <animate attributeName="stroke-dashoffset" from="${c}" to="${offset}" dur="0.85s" fill="freeze" calcMode="spline" keySplines="0.22 1 0.36 1"/>
+    </circle>
+  </svg>`;
+}
 
 function walletBalance(id){
   const w = walletById(id); if(!w) return 0;
@@ -1081,24 +1140,27 @@ function renderHome(){
   return `
   <div class="topbar">
     <div class="eyebrow">${greeting()}</div>
-    <div class="serif" style="font-size:15px; font-weight:500; margin-top:2px;">${tr('home_sub')}</div>
+    <div class="serif" style="font-size:16px; font-weight:500; margin-top:3px;">${tr('home_sub')}</div>
   </div>
 
   ${renderDueSoonBanner()}
 
-  <div style="padding:14px 20px 4px;">
-    <div class="card fade-in" style="padding:26px 24px; text-align:center;">
-      <div class="eyebrow">${tr('total_balance')}</div>
-      <div class="serif" style="font-size:clamp(28px,10vw,44px); font-weight:600; margin-top:6px; word-break:break-word;">${fmt(bal)}</div>
-      <div style="display:flex; justify-content:center; gap:22px; margin-top:16px;">
-        <div style="text-align:center; min-width:0;">
-          <div style="font-size:11px; color:var(--text-soft); font-weight:700;">${tr('this_month_in')}</div>
-          <div style="font-weight:800; color:var(--pos); font-size:clamp(12px,3.6vw,15px); word-break:break-word;">+${fmt(m.income)}</div>
-        </div>
-        <div style="width:1px; background:var(--border); flex-shrink:0;"></div>
-        <div style="text-align:center; min-width:0;">
-          <div style="font-size:11px; color:var(--text-soft); font-weight:700;">${tr('this_month_out')}</div>
-          <div style="font-weight:800; color:var(--neg); font-size:clamp(12px,3.6vw,15px); word-break:break-word;">-${fmt(m.expense)}</div>
+  <div style="padding:16px 20px 4px;">
+    <div class="card fade-in hero-card" style="padding:32px 26px; text-align:center; position:relative; overflow:hidden; box-shadow:var(--shadow-lift);">
+      <div class="hero-orb hero-orb-1"></div>
+      <div class="hero-orb hero-orb-2"></div>
+      <div style="position:relative; z-index:1;">
+        <div class="eyebrow">${tr('total_balance')}</div>
+        <div class="serif" style="font-size:clamp(32px,11vw,48px); font-weight:600; margin-top:8px; word-break:break-word; letter-spacing:-0.01em;">${fmt(bal)}</div>
+        <div style="display:flex; justify-content:center; gap:10px; margin-top:20px;">
+          <div class="hero-stat" style="background:${mixAlpha('var(--pos)','18')};">
+            <div style="font-size:10.5px; color:var(--text-soft); font-weight:700;">${tr('this_month_in')}</div>
+            <div style="font-weight:800; color:var(--pos); font-size:clamp(13px,3.8vw,16px); word-break:break-word;">+${fmt(m.income)}</div>
+          </div>
+          <div class="hero-stat" style="background:${mixAlpha('var(--neg)','16')};">
+            <div style="font-size:10.5px; color:var(--text-soft); font-weight:700;">${tr('this_month_out')}</div>
+            <div style="font-weight:800; color:var(--neg); font-size:clamp(13px,3.8vw,16px); word-break:break-word;">-${fmt(m.expense)}</div>
+          </div>
         </div>
       </div>
     </div>
@@ -1119,8 +1181,8 @@ function renderHome(){
             <span style="font-size:10px; font-weight:800; letter-spacing:.04em; text-transform:uppercase; opacity:.7;">${w.type}</span>
           </div>
           <div style="z-index:1; min-width:0;">
-            <div style="font-size:12.5px; font-weight:700; opacity:.85;">${w.name}</div>
-            <div class="serif" style="font-size:clamp(17px,6vw,24px); font-weight:600; word-break:break-word;">${fmt(walletBalance(w.id))}</div>
+            <div style="font-size:13px; font-weight:700; opacity:.85;">${w.name}</div>
+            <div class="serif" style="font-size:clamp(19px,6.5vw,26px); font-weight:600; word-break:break-word; margin-top:2px;">${fmt(walletBalance(w.id))}</div>
           </div>
         </div>
       `).join('')}
@@ -1153,16 +1215,18 @@ function renderHome(){
     </div>
   </div>
 
-  <div style="padding:14px 20px 4px; display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-    <div class="card fade-in" style="padding:18px; min-width:0;">
+  <div style="padding:16px 20px 4px; display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+    <div class="card fade-in" style="padding:20px 18px; min-width:0;">
       <div class="eyebrow">${tr('todays_spending')}</div>
-      <div class="serif" style="font-size:clamp(18px,6vw,26px); margin-top:6px; word-break:break-word;">${fmt(today)}</div>
+      <div class="serif" style="font-size:clamp(20px,6vw,28px); margin-top:8px; word-break:break-word;">${fmt(today)}</div>
     </div>
-    <div class="card fade-in" style="padding:18px; min-width:0;">
-      <div class="eyebrow">${tr('budget_used')}</div>
-      <div class="serif" style="font-size:clamp(18px,6vw,26px); margin-top:6px;">${budgetPct}%</div>
-      <div class="progress-track" style="margin-top:8px;">
-        <div class="progress-fill" style="width:${budgetPct}%; background:${budgetPct>90?'var(--neg)':'var(--accent-color)'};"></div>
+    <div class="card fade-in" style="padding:16px 18px; min-width:0; display:flex; align-items:center; gap:12px;">
+      <div style="position:relative; width:56px; height:56px; flex-shrink:0;">
+        ${ringSVG(budgetPct, {size:56, stroke:7, color: budgetPct>90?'var(--neg)':'var(--accent-color)'})}
+        <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800;">${budgetPct}%</div>
+      </div>
+      <div style="min-width:0;">
+        <div class="eyebrow">${tr('budget_used')}</div>
       </div>
     </div>
   </div>
@@ -1180,7 +1244,15 @@ function renderHome(){
 }
 
 function emptyRow(){
-  return `<div style="padding:22px 4px; text-align:center; color:var(--text-soft); font-size:13px;">${tr('empty_recent')}</div>`;
+  return `
+  <div style="padding:36px 20px; text-align:center;">
+    <div style="width:56px; height:56px; border-radius:50%; background:${mixAlpha('var(--accent-color)','20')}; display:flex; align-items:center; justify-content:center; margin:0 auto 14px;">
+      ${iconEl('sparkles')}
+    </div>
+    <div style="font-weight:700; font-size:13.5px;">${tr('empty_recent_title')}</div>
+    <div style="color:var(--text-soft); font-size:12px; margin-top:4px;">${tr('empty_recent')}</div>
+    <button onclick="openAddSheet('expense')" style="margin-top:16px; border:none; background:var(--accent-color); color:var(--accent-color-ink); font-family:inherit; font-weight:800; font-size:12.5px; padding:10px 18px; border-radius:12px; cursor:pointer;">${tr('empty_recent_cta')}</button>
+  </div>`;
 }
 
 function renderTxRow(t, isLast){
@@ -1231,16 +1303,83 @@ function renderTlRow(t){
     ? `<img src="${t.photo}" class="photo-thumb">`
     : `<div class="icon-chip" style="width:36px;height:36px;background:${mixAlpha(COLORS[color], '55')}; color:${COLOR_INK[color]};">${iconEl(icon)}</div>`;
   return `
-  <div class="tl-row">
-    <div class="tl-time">${time}</div>
-    ${media}
-    <div style="flex:1; min-width:0;">
-      <div style="font-weight:700; font-size:13.5px;">${label}</div>
-      <div style="font-size:11px; color:var(--text-soft); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${sub}</div>
+  <div class="tl-swipe-wrap">
+    <div class="tl-swipe-delete" onclick="deleteTransactionPrompt('${t.id}')">${iconEl('trash-2')}</div>
+    <div class="tl-swipe-content tl-row" data-swipe-id="${t.id}">
+      <div class="tl-time">${time}</div>
+      ${media}
+      <div style="flex:1; min-width:0;">
+        <div style="font-weight:700; font-size:14px;">${label}</div>
+        <div style="font-size:11px; color:var(--text-soft); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${sub}</div>
+      </div>
+      <div style="font-weight:800; font-size:14px; color:${t.type==='income'?'var(--pos)': t.type==='expense'?'var(--neg)':'var(--text)'};">${fmtSigned(t.amount,t.type)}</div>
     </div>
-    <div style="font-weight:800; font-size:13.5px; color:${t.type==='income'?'var(--pos)': t.type==='expense'?'var(--neg)':'var(--text)'};">${fmtSigned(t.amount,t.type)}</div>
   </div>`;
 }
+
+/* ---------------- SWIPE-TO-DELETE (Timeline rows) ---------------- */
+let _openSwipeEl = null;
+function closeOpenSwipe(){
+  if(_openSwipeEl){
+    _openSwipeEl.style.transition = 'transform .25s cubic-bezier(.22,1,.36,1)';
+    _openSwipeEl.style.transform = 'translateX(0)';
+    _openSwipeEl = null;
+  }
+}
+function attachSwipeHandlers(){
+  document.querySelectorAll('.tl-swipe-content').forEach(el=>{
+    let startX=0, startY=0, dx=0, decided=false, dragging=false;
+    el.addEventListener('pointerdown', (e)=>{
+      if(_openSwipeEl && _openSwipeEl!==el) closeOpenSwipe();
+      startX = e.clientX; startY = e.clientY; dx=0; decided=false; dragging=false;
+      el.style.transition = 'none';
+    });
+    el.addEventListener('pointermove', (e)=>{
+      if(startX===0 && startY===0) return;
+      const ddx = e.clientX-startX, ddy = e.clientY-startY;
+      if(!decided){
+        if(Math.abs(ddx) > 8 && Math.abs(ddx) > Math.abs(ddy)*1.4){
+          decided=true; dragging=true;
+          try{ el.setPointerCapture(e.pointerId); }catch(err){}
+        } else if(Math.abs(ddy) > 8){
+          decided=true; dragging=false;
+        }
+      }
+      if(dragging){
+        dx = Math.max(-76, Math.min(0, ddx));
+        el.style.transform = `translateX(${dx}px)`;
+        e.preventDefault();
+      }
+    });
+    const end = ()=>{
+      if(dragging){
+        el.style.transition = 'transform .25s cubic-bezier(.22,1,.36,1)';
+        if(dx < -38){ el.style.transform = 'translateX(-76px)'; _openSwipeEl = el; }
+        else { el.style.transform = 'translateX(0)'; if(_openSwipeEl===el) _openSwipeEl=null; }
+      }
+      startX=0; startY=0; dx=0; decided=false; dragging=false;
+    };
+    el.addEventListener('pointerup', end);
+    el.addEventListener('pointercancel', end);
+  });
+}
+window.deleteTransactionPrompt = (id)=>{
+  closeOpenSwipe();
+  const tx = state.transactions.find(t=>t.id===id);
+  if(!tx) return;
+  state.transactions = state.transactions.filter(t=>t.id!==id);
+  state.lastDeletedTx = tx;
+  showToast(tr('toast_tx_deleted'), 'trash-2', {label:tr('toast_undo'), onclick:'undoDeleteTx()'});
+  render();
+};
+window.undoDeleteTx = ()=>{
+  if(!state.lastDeletedTx) return;
+  state.transactions.push(state.lastDeletedTx);
+  state.lastDeletedTx = null;
+  document.getElementById('toast').classList.remove('show');
+  showToast(tr('toast_removed'),'check');
+  render();
+};
 
 function renderTimelineList(){
   const f = state.timelineFilter;
@@ -1288,7 +1427,7 @@ function renderTimelineList(){
 
   return `
   <div style="padding:8px 20px 14px;">
-    <div class="card" style="display:flex; align-items:center; gap:10px; padding:12px 16px;">
+    <div class="card" style="display:flex; align-items:center; gap:10px; padding:10px 16px; border-radius:18px;">
       ${iconEl('search')}
       <input id="tlSearch" placeholder="${tr('search_ph')}" value="${f.q}"
         style="border:none; outline:none; background:transparent; font-family:inherit; font-size:13.5px; width:100%; color:var(--text); font-weight:600;">
@@ -1304,7 +1443,10 @@ function renderTimelineList(){
     ${state.categories.filter(c=>c.type==='expense').map(c=>`<div class="chip ${f.categoryId===c.id?'active':''}" onclick="setTlFilter('categoryId','${c.id}')">${c.name}</div>`).join('')}
   </div>
 
-  ${groupsHtml || `<div style="padding:40px 20px; text-align:center; color:var(--text-soft);">${iconEl('search-x')}<div style="margin-top:8px; font-size:13px;">${tr('no_match')}</div></div>`}
+  ${groupsHtml || `<div style="padding:44px 20px; text-align:center;">
+    <div style="width:56px; height:56px; border-radius:50%; background:${mixAlpha('var(--secondary)','25')}; display:flex; align-items:center; justify-content:center; margin:0 auto 14px; color:var(--secondary-ink);">${iconEl('search-x')}</div>
+    <div style="font-size:12.5px; color:var(--text-soft);">${tr('no_match')}</div>
+  </div>`}
   `;
 }
 
@@ -1402,7 +1544,7 @@ function renderTimeline(){
     <div style="display:flex; align-items:center; justify-content:space-between;">
       <div>
         <div class="eyebrow">${tr('journal')}</div>
-        <div class="serif" style="font-size:22px; font-weight:600; margin-top:2px;">${tr('timeline_title')}</div>
+        <div class="serif" style="font-size:24px; font-weight:600; margin-top:3px;">${tr('timeline_title')}</div>
       </div>
       <div class="segmented" style="width:auto; padding:3px;">
         <button class="${state.timelineView==='list'?'active':''}" onclick="setTimelineView('list')" style="padding:8px 12px; display:flex; align-items:center;">${iconEl('list')}</button>
@@ -1490,12 +1632,29 @@ function renderBnplSection(){
 function renderBudget(){
   const m = monthTotals();
   const list = insights();
+  const budgetTotal = state.budgets.reduce((s,b)=>s+b.limit,0);
+  const budgetSpent = state.budgets.reduce((s,b)=>s+(m.catTotals[b.categoryId]||0),0);
+  const overviewPct = budgetTotal>0 ? Math.min(100, Math.round((budgetSpent/budgetTotal)*100)) : 0;
 
   return `
   <div class="topbar">
     <div class="eyebrow">${tr('this_month')}</div>
-    <div class="serif" style="font-size:22px; font-weight:600; margin-top:2px;">${tr('budget_title')}</div>
+    <div class="serif" style="font-size:24px; font-weight:600; margin-top:3px;">${tr('budget_title')}</div>
   </div>
+
+  ${budgetTotal>0 ? `
+  <div style="padding:8px 20px 4px;">
+    <div class="card fade-in" style="padding:22px; display:flex; align-items:center; gap:18px;">
+      <div style="position:relative; width:88px; height:88px; flex-shrink:0;">
+        ${ringSVG(overviewPct, {size:88, stroke:10, color: overviewPct>90?'var(--neg)':'var(--accent-color)'})}
+        <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:19px; font-weight:800;">${overviewPct}%</div>
+      </div>
+      <div style="min-width:0;">
+        <div class="eyebrow">${tr('monthly_overview')}</div>
+        <div style="font-size:12.5px; color:var(--text-soft); margin-top:6px; line-height:1.5;">${trf('overview_hint', fmt(budgetSpent), fmt(budgetTotal))}</div>
+      </div>
+    </div>
+  </div>` : ''}
 
   <div style="padding:8px 20px 4px;">
     <div class="card" style="padding:20px 16px; display:flex; justify-content:space-between; gap:8px;">
@@ -1547,7 +1706,7 @@ function renderBudget(){
     <div style="display:flex; flex-direction:column; gap:10px;">
       ${list.map(x=>`
         <div class="card fade-in" style="padding:14px 16px; display:flex; align-items:center; gap:12px;">
-          <div class="icon-chip" style="background:var(--accent-color)33; color:var(--accent-color-ink); width:36px; height:36px;">${iconEl(x.icon)}</div>
+          <div class="icon-chip" style="background:${mixAlpha('var(--accent-color)','33')}; color:var(--accent-color-ink); width:36px; height:36px;">${iconEl(x.icon)}</div>
           <div style="font-size:13px; font-weight:600; line-height:1.4;">${x.text}</div>
         </div>`).join('')}
     </div>
@@ -1565,7 +1724,7 @@ function renderGoalCard(){
   if(!g){
     return `
     <div class="card fade-in" style="padding:26px 22px; text-align:center;">
-      <div class="icon-chip" style="margin:0 auto 12px; background:var(--accent-color)33; color:var(--accent-color-ink);">${iconEl('sparkles')}</div>
+      <div class="icon-chip" style="margin:0 auto 12px; background:${mixAlpha('var(--accent-color)','33')}; color:var(--accent-color-ink);">${iconEl('sparkles')}</div>
       <div style="font-weight:700; font-size:13.5px;">${tr('no_goal_yet')}</div>
       <div style="font-size:12px; color:var(--text-soft); margin-top:6px; line-height:1.5;">${tr('no_goal_hint')}</div>
     </div>`;
@@ -1640,22 +1799,96 @@ function renderLoansSection(){
   </div>`;
 }
 
+function computeProfileStats(){
+  // streak: consecutive days (walking back from today) with at least one transaction
+  let streak = 0;
+  let cursor = new Date(); cursor.setHours(0,0,0,0);
+  const daysWithTx = new Set(state.transactions.map(t=> new Date(t.date).toDateString()));
+  while(daysWithTx.has(cursor.toDateString())){
+    streak++;
+    cursor.setDate(cursor.getDate()-1);
+  }
+
+  // best month: highest net (income - expense) among months that have any transactions
+  const byMonth = {};
+  state.transactions.forEach(t=>{
+    const d = new Date(t.date);
+    const key = d.getFullYear()+'-'+d.getMonth();
+    byMonth[key] = byMonth[key] || { y:d.getFullYear(), m:d.getMonth(), income:0, expense:0 };
+    if(t.type==='income') byMonth[key].income += t.amount;
+    if(t.type==='expense') byMonth[key].expense += t.amount;
+  });
+  let bestMonth = null;
+  Object.values(byMonth).forEach(mm=>{
+    const net = mm.income - mm.expense;
+    if(!bestMonth || net > bestMonth.net) bestMonth = { ...mm, net };
+  });
+
+  // favorite category: highest total spend this month
+  const mt = monthTotals();
+  const catEntries = Object.entries(mt.catTotals).sort((a,b)=>b[1]-a[1]);
+  const favoriteCategory = catEntries.length ? catById(catEntries[0][0]) : null;
+
+  return {
+    streak,
+    walletCount: state.wallets.length,
+    txCount: state.transactions.length,
+    bestMonth,
+    favoriteCategory,
+  };
+}
+
 function renderProfile(){
+  const stats = computeProfileStats();
+  const initial = (state.user?.email || '?').charAt(0).toUpperCase();
   return `
   <div class="topbar">
     <div class="eyebrow">${tr('you')}</div>
-    <div class="serif" style="font-size:22px; font-weight:600; margin-top:2px;">${tr('profile_settings')}</div>
+    <div class="serif" style="font-size:24px; font-weight:600; margin-top:3px;">${tr('profile_settings')}</div>
   </div>
 
   <div style="padding:8px 20px 4px;">
-    <div class="eyebrow" style="margin-bottom:10px;">${tr('account')}</div>
-    <div class="card" style="padding:16px 18px; display:flex; align-items:center; gap:12px;">
-      <div class="icon-chip" style="background:var(--accent-color)33; color:var(--accent-color-ink);">${iconEl('circle-user-round')}</div>
-      <div style="flex:1; min-width:0;">
-        <div style="font-size:10.5px; color:var(--text-soft); font-weight:700; text-transform:uppercase; letter-spacing:.04em;">${tr('signed_in_as')}</div>
-        <div style="font-weight:700; font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${state.user?.email || ''}</div>
+    <div class="card fade-in" style="padding:22px; position:relative; overflow:hidden;">
+      <div style="display:flex; align-items:center; gap:14px;">
+        <div style="width:52px; height:52px; border-radius:50%; background:linear-gradient(135deg, var(--primary), var(--secondary)); display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:var(--shadow);">
+          <span class="serif" style="font-size:22px; font-weight:700; color:var(--card);">${initial}</span>
+        </div>
+        <div style="flex:1; min-width:0;">
+          <div style="font-size:10.5px; color:var(--text-soft); font-weight:700; text-transform:uppercase; letter-spacing:.04em;">${tr('signed_in_as')}</div>
+          <div style="font-weight:700; font-size:14px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${state.user?.email || ''}</div>
+        </div>
+        <button onclick="doSignOut()" style="border:1px solid var(--border); background:var(--card); color:var(--neg); font-family:inherit; font-weight:700; font-size:12px; padding:9px 14px; border-radius:12px; cursor:pointer; flex-shrink:0;">${tr('sign_out')}</button>
       </div>
-      <button onclick="doSignOut()" style="border:1px solid var(--border); background:var(--card); color:var(--neg); font-family:inherit; font-weight:700; font-size:12px; padding:9px 14px; border-radius:12px; cursor:pointer; flex-shrink:0;">${tr('sign_out')}</button>
+
+      <div style="display:flex; gap:8px; margin-top:18px;">
+        <div class="hero-stat" style="background:${mixAlpha('var(--accent)','22')}; text-align:center;">
+          <div class="serif" style="font-size:19px; font-weight:700;">${stats.streak}</div>
+          <div style="font-size:10px; color:var(--text-soft); font-weight:700; margin-top:2px;">${tr('day_streak')}</div>
+        </div>
+        <div class="hero-stat" style="background:${mixAlpha('var(--secondary)','22')}; text-align:center;">
+          <div class="serif" style="font-size:19px; font-weight:700;">${stats.walletCount}</div>
+          <div style="font-size:10px; color:var(--text-soft); font-weight:700; margin-top:2px;">${tr('wallets')}</div>
+        </div>
+        <div class="hero-stat" style="background:${mixAlpha('var(--primary)','22')}; text-align:center;">
+          <div class="serif" style="font-size:19px; font-weight:700;">${stats.txCount}</div>
+          <div style="font-size:10px; color:var(--text-soft); font-weight:700; margin-top:2px;">${tr('entries')}</div>
+        </div>
+      </div>
+
+      ${(stats.bestMonth || stats.favoriteCategory) ? `
+        <div style="margin-top:16px; padding-top:16px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:8px;">
+          ${stats.bestMonth ? `
+            <div style="display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-soft);">
+              ${iconEl('trending-up')}
+              <span>${trf('best_month_line', new Date(stats.bestMonth.y, stats.bestMonth.m, 1).toLocaleDateString(dLocale(),{month:'long', year:'numeric'}), fmt(stats.bestMonth.net))}</span>
+            </div>` : ''}
+          ${stats.favoriteCategory ? `
+            <div style="display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-soft);">
+              ${iconEl('flame')}
+              <span>${trf('favorite_category_line', stats.favoriteCategory.name)}</span>
+            </div>` : ''}
+        </div>
+      ` : ''}
     </div>
   </div>
 
@@ -2221,6 +2454,7 @@ function renderWalletPage(){
         : `<div style="padding:24px 4px; text-align:center; color:var(--text-soft); font-size:13px;">${tr('no_wallet_entries')}</div>`}
     </div>
   `;
+  attachSwipeHandlers();
 }
 
 /* ---------------- ADD SHEET ---------------- */
@@ -2766,9 +3000,11 @@ function render(){
   document.getElementById('navlbl-budget').textContent = tr('nav_budget');
   document.getElementById('navlbl-profile').textContent = tr('nav_profile');
   const map = { home:renderHome, timeline:renderTimeline, budget:renderBudget, profile:renderProfile };
+  _openSwipeEl = null; // stale DOM reference — content is about to be rebuilt
   document.getElementById('content').innerHTML = map[state.tab]();
   const s = document.getElementById('tlSearch');
   if(s) s.addEventListener('input', (e)=>{ state.timelineFilter.q = e.target.value; renderTimelineListOnly(); });
+  attachSwipeHandlers();
   scheduleServerSave();
 }
 function renderTimelineListOnly(){
@@ -2776,12 +3012,14 @@ function renderTimelineListOnly(){
   const active = document.activeElement;
   const wasSearch = active && active.id==='tlSearch';
   const caret = wasSearch ? active.selectionStart : null;
+  _openSwipeEl = null;
   document.getElementById('content').innerHTML = renderTimeline();
   const s = document.getElementById('tlSearch');
   if(s){
     s.addEventListener('input', (e)=>{ state.timelineFilter.q = e.target.value; renderTimelineListOnly(); });
     if(wasSearch){ s.focus(); s.setSelectionRange(caret, caret); }
   }
+  attachSwipeHandlers();
 }
 
 document.querySelectorAll('.navbtn').forEach(b=> b.addEventListener('click', ()=> switchTab(b.dataset.tab)));

@@ -710,6 +710,11 @@ const TR = {
   sts_line_inst:['−%s in installment payments due','−%s ค่าผ่อนที่ต้องจ่ายงวดนี้'],
   sts_line_owed:['−%s you owe friends','−%s ที่ติดเพื่อนอยู่'],
   sts_clear:['No upcoming bills, installments, or debts pulling this down.','ไม่มีบิล ค่าผ่อน หรือหนี้ค้างที่จะมาลดยอดนี้เลย'],
+  mark_as_installment:['This is an installment purchase','รายการนี้เป็นการผ่อนชำระ'],
+  total_price_label:["That's the item's total price, not what you're paying today",'นี่คือราคาสินค้ารวมทั้งหมด ไม่ใช่ยอดที่จ่ายวันนี้'],
+  installment_note_prefix:['First installment payment','จ่ายงวดแรก'],
+  toast_installment_started:['Installment plan started','เริ่มรายการผ่อนชำระแล้ว'],
+  next_due_ph:['Next payment date','วันที่จ่ายงวดถัดไป'],
   toast_server_loaded:['Loaded your saved data','โหลดข้อมูลที่บันทึกไว้แล้ว'],
   app_tagline:['A quiet place for your money story','พื้นที่เงียบๆ สำหรับเรื่องราวการเงินของคุณ'],
   email:['Email','อีเมล'], password:['Password','รหัสผ่าน'],
@@ -793,8 +798,8 @@ const state = {
   ],
 
   installments:[
-    {id:'i1', name:'iPhone 15 Pro', icon:'smartphone', color:'secondary', totalAmount:35000, installments:10, paid:3, categoryId:'c4', walletId:'w2'},
-    {id:'i2', name:'Motorcycle', icon:'car', color:'accent', totalAmount:60000, installments:24, paid:8, categoryId:'c3', walletId:'w2'},
+    {id:'i1', name:'iPhone 15 Pro', icon:'smartphone', color:'secondary', totalAmount:35000, installments:10, paid:3, categoryId:'c4', walletId:'w2', nextDue:'2026-07-28'},
+    {id:'i2', name:'Motorcycle', icon:'car', color:'accent', totalAmount:60000, installments:24, paid:8, categoryId:'c3', walletId:'w2', nextDue:'2026-08-05'},
   ],
 
   loans:[
@@ -951,7 +956,11 @@ function safeToSpendCalc(){
     .reduce((s,r)=> s+r.amount, 0);
 
   const installmentDue = state.installments
-    .filter(inst=> inst.paid < inst.installments)
+    .filter(inst=> inst.paid < inst.installments && inst.nextDue)
+    .filter(inst=>{
+      const d = new Date(inst.nextDue+'T12:00:00');
+      return d.getFullYear()===now.getFullYear() && d.getMonth()===now.getMonth() && daysUntil(inst.nextDue)>=0;
+    })
     .reduce((s,inst)=> s + Math.round(inst.totalAmount/inst.installments), 0);
 
   const owed = state.loans
@@ -1000,10 +1009,15 @@ function showToast(msg, icon='check', action=null){
 /* ---------------- RENDER: HOME ---------------- */
 function renderDueSoonBanner(){
   const DUE_WINDOW_DAYS = 5;
-  const items = state.recurring
+  const recurItems = state.recurring
     .filter(r=> r.nextDue)
-    .map(r=> ({...r, daysLeft: daysUntil(r.nextDue)}))
-    .filter(r=> r.daysLeft <= DUE_WINDOW_DAYS)
+    .map(r=> ({ kind:'recurring', id:r.id, name:r.name, icon:r.icon, type:r.type, daysLeft: daysUntil(r.nextDue) }));
+  const instItems = state.installments
+    .filter(inst=> inst.nextDue && inst.paid < inst.installments)
+    .map(inst=> ({ kind:'installment', id:inst.id, name:inst.name, icon:inst.icon, type:'expense', daysLeft: daysUntil(inst.nextDue) }));
+
+  const items = [...recurItems, ...instItems]
+    .filter(x=> x.daysLeft <= DUE_WINDOW_DAYS)
     .sort((a,b)=> a.daysLeft - b.daysLeft);
   if(!items.length) return '';
 
@@ -1014,16 +1028,16 @@ function renderDueSoonBanner(){
         ${iconEl('calendar-days')}
         <div style="font-weight:800; font-size:12.5px;">${trf('due_soon_title', items.length)}</div>
       </div>
-      ${items.map((r,i)=>`
+      ${items.map((x,i)=>`
         <div style="display:flex; align-items:center; gap:12px; padding:11px 0; ${i===items.length-1?'':'border-bottom:1px solid var(--border);'}">
-          <div class="icon-chip" style="width:36px;height:36px;background:${mixAlpha(COLORS.secondary,'55')}; color:${COLOR_INK.secondary};">${iconEl(r.icon)}</div>
+          <div class="icon-chip" style="width:36px;height:36px;background:${mixAlpha(COLORS.secondary,'55')}; color:${COLOR_INK.secondary};">${iconEl(x.icon)}</div>
           <div style="flex:1; min-width:0;">
-            <div style="font-weight:700; font-size:13px;">${r.name}</div>
-            <div style="font-size:11px; color:${r.daysLeft<0?'var(--neg)':'var(--text-soft)'}; font-weight:600;">
-              ${r.daysLeft<0 ? trf('overdue_by', Math.abs(r.daysLeft)) : r.daysLeft===0 ? tr('due_today') : trf('due_in_days', r.daysLeft)}
+            <div style="font-weight:700; font-size:13px;">${x.name}</div>
+            <div style="font-size:11px; color:${x.daysLeft<0?'var(--neg)':'var(--text-soft)'}; font-weight:600;">
+              ${x.daysLeft<0 ? trf('overdue_by', Math.abs(x.daysLeft)) : x.daysLeft===0 ? tr('due_today') : trf('due_in_days', x.daysLeft)}
             </div>
           </div>
-          <button onclick="logRecurringNow('${r.id}')" style="border:none; background:var(--accent-color); color:var(--accent-color-ink); font-family:inherit; font-weight:800; font-size:11px; padding:8px 13px; border-radius:11px; cursor:pointer; flex-shrink:0;">${r.type==='income'?tr('log_income'):tr('pay_now')}</button>
+          <button onclick="${x.kind==='recurring'?`logRecurringNow('${x.id}')`:`payInstallment('${x.id}')`}" style="border:none; background:var(--accent-color); color:var(--accent-color-ink); font-family:inherit; font-weight:800; font-size:11px; padding:8px 13px; border-radius:11px; cursor:pointer; flex-shrink:0;">${x.type==='income'?tr('log_income'):tr('pay_now')}</button>
         </div>`).join('')}
     </div>
   </div>`;
@@ -1728,7 +1742,7 @@ function renderProfile(){
             <div class="icon-chip" style="background:${mixAlpha(COLORS[inst.color], '55')}; color:${COLOR_INK[inst.color]};">${iconEl(inst.icon)}</div>
             <div style="flex:1; min-width:0;">
               <div style="font-weight:700; font-size:13.5px;">${inst.name}</div>
-              <div style="font-size:11px; color:var(--text-soft);">${trf('inst_progress', inst.paid, inst.installments)}</div>
+              <div style="font-size:11px; color:${!done && inst.nextDue && daysUntil(inst.nextDue)<0 ? 'var(--neg)' : 'var(--text-soft)'};">${trf('inst_progress', inst.paid, inst.installments)}${!done && inst.nextDue ? ' · '+(daysUntil(inst.nextDue)<0 ? trf('overdue_by', Math.abs(daysUntil(inst.nextDue))) : daysUntil(inst.nextDue)===0 ? tr('due_today') : trf('due_in_days', daysUntil(inst.nextDue))) : ''}</div>
             </div>
             <div style="font-size:12.5px; font-weight:700; color:var(--text-soft); flex-shrink:0;">${fmt(perInst)}</div>
           </div>
@@ -2219,6 +2233,8 @@ function openAddSheet(type){
   state.addNote = '';
   state.addDate = new Date().toISOString().slice(0,10);
   state.addPhoto = null;
+  state.addIsInstallment = false;
+  state.addInstallmentCount = '';
   state.addOpen = true;
   renderSheet();
   document.getElementById('overlay').classList.add('open');
@@ -2233,6 +2249,7 @@ window.setAddType = (t)=>{ state.addType=t; state.addSelectedCategory = state.ca
 window.selectCategory = (id)=>{ state.addSelectedCategory=id; renderSheet(); };
 window.selectWallet = (id)=>{ state.addSelectedWallet=id; renderSheet(); };
 window.selectToWallet = (id)=>{ state.addSelectedToWallet=id; renderSheet(); };
+window.toggleAddInstallment = ()=>{ state.addIsInstallment = !state.addIsInstallment; renderSheet(); };
 window.handlePhotoSelect = (input)=>{
   const file = input.files && input.files[0];
   if(!file) return;
@@ -2255,8 +2272,30 @@ function renderSheet(){
 
     <div style="margin-top:6px;">
       <input class="amount-input" id="amountInput" type="number" inputmode="decimal" placeholder="฿0" min="0" step="0.01"
-        value="${state.addAmount}" oninput="state.addAmount=this.value">
+        value="${state.addAmount}" oninput="state.addAmount=this.value; updateInstallPreview();">
+      ${t==='expense' && state.addIsInstallment ? `<div style="text-align:center; font-size:11px; color:var(--text-soft); font-weight:700; margin-top:-6px;">${tr('total_price_label')}</div>` : ''}
     </div>
+
+    ${t==='expense' ? `
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 4px 4px;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          ${iconEl('receipt')}
+          <span style="font-size:12.5px; font-weight:700;">${tr('mark_as_installment')}</span>
+        </div>
+        <button onclick="toggleAddInstallment()" style="width:44px; height:26px; border-radius:13px; border:1px solid var(--border); background:${state.addIsInstallment?'var(--accent-color)':'var(--border)'}; position:relative; cursor:pointer;">
+          <div style="width:20px; height:20px; border-radius:50%; background:var(--card); position:absolute; top:2px; left:${state.addIsInstallment?'20px':'2px'}; transition:left .2s ease;"></div>
+        </button>
+      </div>
+      ${state.addIsInstallment ? `
+        <div class="card" style="padding:2px 16px; margin-top:8px;">
+          <div class="field-row">
+            ${iconEl('calendar-days')}
+            <input id="installCountInput" type="number" min="1" step="1" placeholder="${tr('num_installments')}" value="${state.addInstallmentCount}" oninput="state.addInstallmentCount=this.value; updateInstallPreview();">
+          </div>
+        </div>
+        <div id="installPreview" style="font-size:11px; color:var(--text-soft); padding:8px 4px 0;">${(parseFloat(state.addAmount) && parseInt(state.addInstallmentCount)) ? trf('per_installment', fmt(Math.round(parseFloat(state.addAmount)/parseInt(state.addInstallmentCount)))) : ''}</div>
+      ` : ''}
+    ` : ''}
 
     ${t!=='transfer' ? `
       <div class="eyebrow" style="margin:6px 4px 8px;">${tr('category')}</div>
@@ -2335,6 +2374,21 @@ window.saveTransaction = ()=>{
     if(state.addSelectedWallet===state.addSelectedToWallet){ showToast(tr('err_two_wallets'),'circle-alert'); return; }
     state.transactions.push({id:newId(), type:'transfer', categoryId:'', walletId:state.addSelectedWallet, toWalletId:state.addSelectedToWallet, amount:amountRaw, note, date:d.toISOString(), photo:null});
     showToast(tr('toast_transfer_recorded'),'send');
+  } else if(state.addType==='expense' && state.addIsInstallment){
+    if(!state.addSelectedCategory){ showToast(tr('err_category'),'circle-alert'); return; }
+    const count = parseInt(state.addInstallmentCount);
+    if(!count || count<1){ showToast(tr('err_installments_count'),'circle-alert'); return; }
+    const perInstallment = Math.round(amountRaw / count);
+    const cat = catById(state.addSelectedCategory);
+    state.installments.push({
+      id:newId(), name: note || cat?.name || tr('new_installment'),
+      icon: cat?.icon || 'credit-card', color: cat?.color || 'secondary',
+      totalAmount: amountRaw, installments: count, paid: 1,
+      categoryId: state.addSelectedCategory, walletId: state.addSelectedWallet,
+      nextDue: advanceDate(d.toISOString().slice(0,10), 'Monthly'),
+    });
+    state.transactions.push({id:newId(), type:'expense', categoryId:state.addSelectedCategory, walletId:state.addSelectedWallet, toWalletId:null, amount:perInstallment, note: note || tr('installment_note_prefix'), date:d.toISOString(), photo:state.addPhoto});
+    showToast(tr('toast_installment_started'), 'sparkles');
   } else {
     if(!state.addSelectedCategory){ showToast(tr('err_category'),'circle-alert'); return; }
     state.transactions.push({id:newId(), type:state.addType, categoryId:state.addSelectedCategory, walletId:state.addSelectedWallet, toWalletId:null, amount:amountRaw, note, date:d.toISOString(), photo:state.addPhoto});
@@ -2461,7 +2515,8 @@ window.openInstSheet = (id)=>{
   } else {
     state.instEditingId = null;
     state.instForm = { name:'', icon:'credit-card', color:'secondary', totalAmount:'', installments:'', paid:0,
-      categoryId: state.categories.find(c=>c.type==='expense')?.id, walletId: state.wallets[0]?.id };
+      categoryId: state.categories.find(c=>c.type==='expense')?.id, walletId: state.wallets[0]?.id,
+      nextDue: advanceDate(new Date().toISOString().slice(0,10), 'Monthly') };
   }
   renderInstSheet();
   document.getElementById('instOverlay').classList.add('open');
@@ -2481,11 +2536,13 @@ window.saveInstItem = ()=>{
   const totalAmount = parseFloat(document.getElementById('instTotal')?.value);
   const installments = parseInt(document.getElementById('instCount')?.value);
   const paid = parseInt(document.getElementById('instPaid')?.value) || 0;
+  const nextDue = document.getElementById('instNextDue')?.value || state.instForm.nextDue;
   if(!name){ showToast(tr('err_name'),'circle-alert'); return; }
   if(!totalAmount || totalAmount<=0){ showToast(tr('err_amount'),'circle-alert'); return; }
   if(!installments || installments<=0){ showToast(tr('err_installments_count'),'circle-alert'); return; }
   state.instForm.name = name; state.instForm.totalAmount = totalAmount;
   state.instForm.installments = installments; state.instForm.paid = Math.min(paid, installments);
+  state.instForm.nextDue = nextDue;
 
   if(state.instEditingId){
     const inst = state.installments.find(x=>x.id===state.instEditingId);
@@ -2512,16 +2569,18 @@ window.payInstallment = (id)=>{
   const tx = {id:newId(), type:'expense', categoryId:inst.categoryId, walletId:inst.walletId, toWalletId:null, amount:perInst, note:inst.name, date:new Date().toISOString(), photo:null};
   state.transactions.push(tx);
   inst.paid += 1;
-  state.lastInstPayment = { instId:id, txId:tx.id };
+  const prevDue = inst.nextDue;
+  inst.nextDue = advanceDate(inst.nextDue || new Date().toISOString().slice(0,10), 'Monthly');
+  state.lastInstPayment = { instId:id, txId:tx.id, prevDue };
   showToast(trf('toast_logged', inst.name), 'zap', {label:tr('toast_undo'), onclick:'undoInstPayment()'});
   render();
 };
 window.undoInstPayment = ()=>{
   if(!state.lastInstPayment) return;
-  const { instId, txId } = state.lastInstPayment;
+  const { instId, txId, prevDue } = state.lastInstPayment;
   state.transactions = state.transactions.filter(t=>t.id!==txId);
   const inst = state.installments.find(x=>x.id===instId);
-  if(inst) inst.paid = Math.max(0, inst.paid-1);
+  if(inst){ inst.paid = Math.max(0, inst.paid-1); inst.nextDue = prevDue; }
   state.lastInstPayment = null;
   document.getElementById('toast').classList.remove('show');
   showToast(tr('toast_removed'),'trash-2');
@@ -2552,6 +2611,10 @@ function renderInstSheet(){
       <div class="field-row">
         ${iconEl('check')}
         <input id="instPaid" type="number" placeholder="${tr('paid_so_far')}" value="${f.paid||0}" min="0" step="1">
+      </div>
+      <div class="field-row">
+        ${iconEl('calendar-days')}
+        <input id="instNextDue" type="date" value="${f.nextDue || ''}">
       </div>
       <div class="field-row">
         ${iconEl('wallet')}
@@ -2678,6 +2741,13 @@ function renderLoanSheet(){
     ${state.loanEditingId ? `<button onclick="deleteLoanItem('${state.loanEditingId}')" style="width:100%; border:none; background:none; color:var(--neg); font-family:inherit; font-weight:700; font-size:13px; padding:14px; cursor:pointer;">${tr('remove')}</button>` : ''}
   `;
 }
+window.updateInstallPreview = ()=>{
+  const el = document.getElementById('installPreview');
+  if(!el) return;
+  const total = parseFloat(state.addAmount);
+  const count = parseInt(state.addInstallmentCount);
+  el.textContent = (total && count) ? trf('per_installment', fmt(Math.round(total/count))) : '';
+};
 window.renderInstSheet_livePreview = ()=>{
   const total = parseFloat(document.getElementById('instTotal')?.value);
   const count = parseInt(document.getElementById('instCount')?.value);
